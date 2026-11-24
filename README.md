@@ -17,8 +17,9 @@ Each state is a different steady LED colour. A dark device has no power.
 
 ## Status
 
-Specification, plus a tested throwaway spike in [spikes/websdk-raise-hand](spikes/websdk-raise-hand/README.md).
-Start with [the specification](docs/specification/README.md).
+Version 1: [console](console/README.md) and [device firmware](firmware/README.md). Behaviour is
+defined in [the specification](docs/specification/README.md); the Web SDK approach was tested in
+[spikes/websdk-raise-hand](spikes/websdk-raise-hand/README.md).
 
 The spike showed that the Zoom Meeting SDK for Web sees every raised hand without co-host rights,
 but only joins meetings hosted on the Zoom account its Zoom app was created in. The app therefore

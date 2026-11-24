@@ -1,0 +1,10 @@
+{
+  "clientId": "ZOOM_APP_CLIENT_ID_FROM_THE_MEETING_HOSTING_ACCOUNT",
+  "clientSecret": "ZOOM_APP_CLIENT_SECRET",
+  "meetingNumber": "12345678901",
+  "passcode": "",
+  "displayName": "Hand signal",
+  "deviceUrl": "http://hand-signal.local",
+  "deviceToken": "same-value-as-DEVICE_TOKEN-in-firmware-secrets.h",
+  "port": 8787
+}

@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hand signal console</title>
+<style>
+  :root { --bg:#f4f5f7; --fg:#1b1f24; --muted:#5b6470; --card:#fff; --line:#d9dde3;
+          --lowered:#1f9d55; --raised:#d64545; --notwatching:#c07e00; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.45 system-ui, sans-serif; background:var(--bg); color:var(--fg); }
+  main { max-width:900px; margin:0 auto; padding:16px; display:grid; gap:14px; }
+  section { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px 14px; }
+  h1 { font-size:18px; margin:0; }
+  h2 { font-size:13px; margin:0 0 8px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+  #state { display:flex; align-items:center; gap:16px; color:#fff; border-radius:8px; padding:14px 18px; }
+  #state.lowered { background:var(--lowered); } #state.raised { background:var(--raised); }
+  #state.not_watching { background:var(--notwatching); }
+  #count { font-size:52px; font-weight:700; min-width:64px; text-align:center; }
+  #stateLabel { font-size:22px; font-weight:600; }
+  #reason { font-size:14px; opacity:.9; }
+  ul { margin:0; padding-left:20px; }
+  .muted { color:var(--muted); }
+  .bad { color:var(--raised); font-weight:600; }
+  button { font:inherit; padding:6px 12px; border-radius:6px; border:1px solid var(--line); background:#fff; cursor:pointer; }
+  details summary { cursor:pointer; color:var(--muted); }
+  #zoomRoot { min-height:40px; margin-top:8px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Hand signal console</h1>
+
+  <section>
+    <div id="state" class="not_watching">
+      <div id="count">–</div>
+      <div><div id="stateLabel">not watching</div><div id="reason">Starting…</div></div>
+    </div>
+    <p id="action" hidden><button id="retry" type="button">Try again now</button></p>
+  </section>
+
+  <section>
+    <h2>Raised hands</h2>
+    <ul id="hands"><li class="muted">None</li></ul>
+  </section>
+
+  <section>
+    <h2>Device</h2>
+    <div id="device" class="muted">Not contacted yet.</div>
+  </section>
+
+  <section>
+    <details>
+      <summary>Zoom meeting view (don't join audio or start video here)</summary>
+      <div id="zoomRoot"></div>
+    </details>
+  </section>
+</main>
+
+<script src="https://source.zoom.us/6.10.0/lib/vendor/react.min.js"></script>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/react-dom.min.js"></script>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/redux.min.js"></script>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/redux-thunk.min.js"></script>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/react-redux.min.js"></script>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/lodash.min.js"></script>
+<script src="https://source.zoom.us/zoom-meeting-embedded-6.10.0.min.js"></script>
+<script>
+(() => {
+  const RETRY_MS = 30000;               // UC-HAND-001: retry every 30 s before the meeting starts
+  const POLL_MS = 500;                   // CON-ZOOM-WEBSDK: re-read the whole list, don't trust events alone
+  const NOT_STARTED = new Set([3008, 3129]);
+  const $ = (id) => document.getElementById(id);
+
+  let client = null;
+  let connection = 'Closed';
+  let reason = 'Starting…';
+  let retryTimer = null;
+
+  // ----- view -----
+  function show(state, count, hands) {
+    const el = $('state');
+    el.className = state;
+    $('count').textContent = state === 'raised' ? (count > 9 ? '9+' : String(count)) : state === 'lowered' ? '0' : '–';
+    $('stateLabel').textContent = state === 'not_watching' ? 'not watching' : state;
+    $('reason').textContent = state === 'not_watching' ? reason : 'In the meeting';
+    const list = $('hands');
+    if (!hands.length) { list.replaceChildren(Object.assign(document.createElement('li'), { className: 'muted', textContent: 'None' })); }
+    else list.replaceChildren(...hands.map((name) => Object.assign(document.createElement('li'), { textContent: name })));
+  }
+
+  function showDevice(d) {
+    const el = $('device');
+    if (!d) return;
+    el.className = d.ok ? '' : 'bad';
+    el.textContent = d.ok ? `Connected: ${d.url}` : `Can't reach ${d.url}: ${d.lastError}. The device shows "not watching" until this is fixed.`;
+  }
+
+  // ----- state, every 500 ms -----
+  function compute() {
+    let list = [], me = null;
+    if (client && connection === 'Connected') {
+      try { list = client.getAttendeeslist() || []; me = client.getCurrentUser(); } catch (e) { /* not ready */ }
+    }
+    if (connection !== 'Connected' || !me || me.isHold) {
+      if (me && me.isHold) reason = 'Waiting to be admitted from the waiting room.';
+      return { state: 'not_watching', count: 0, hands: [] };
+    }
+    const raised = list.filter((p) => p.userId !== me.userId && p.bRaiseHand && !p.isHold);
+    return { state: raised.length ? 'raised' : 'lowered', count: raised.length, hands: raised.map((p) => p.displayName || `user ${p.userId}`) };
+  }
+
+  async function tick() {
+    const s = compute();
+    show(s.state, s.count, s.hands);
+    try {
+      const res = await fetch('/api/state', { method: 'POST', body: JSON.stringify({ state: s.state, count: s.count }) });
+      showDevice((await res.json()).device);
+    } catch (e) {
+      $('device').textContent = 'Console program not reachable. Is server.mjs running?';
+      $('device').className = 'bad';
+    }
+  }
+  setInterval(tick, POLL_MS);
+
+  // ----- joining -----
+  function scheduleRestart(ms, why) {
+    reason = why;
+    clearTimeout(retryTimer);
+    // A fresh page load is the cleanest way to join again with the Web SDK.
+    retryTimer = setTimeout(() => location.reload(), ms);
+  }
+
+  async function join() {
+    try {
+      const params = await (await fetch('/api/join-params', { method: 'POST' })).json();
+      client = ZoomMtgEmbedded.createClient();
+      await client.init({ zoomAppRoot: $('zoomRoot'), language: 'en-US', patchJsMedia: true, leaveOnPageUnload: true });
+      client.on('connection-change', (p) => {
+        connection = p && p.state;
+        if (connection === 'Reconnecting') reason = p.reason === 'on hold' ? 'Waiting to be admitted from the waiting room.' : 'Reconnecting to Zoom…';
+        if (connection === 'Closed') {
+          scheduleRestart(RETRY_MS, `Left the meeting (${p.reason || 'closed'}). Joining again in 30 s.`);
+        }
+        tick();
+      });
+      client.on('user-updated', tick);
+      client.on('user-added', tick);
+      client.on('user-removed', tick);
+      reason = 'Joining…';
+      await client.join(params);
+      connection = 'Connected';
+      tick();
+    } catch (err) {
+      const code = err && err.errorCode;
+      const why = (err && (err.reason || err.message)) || String(err);
+      if (NOT_STARTED.has(code)) {
+        scheduleRestart(RETRY_MS, 'The meeting hasn\'t started. Trying again every 30 s.');
+      } else {
+        // Wrong ID or passcode, locked meeting, another account (4011), Meeting SDK off (3712)…
+        clearTimeout(retryTimer);
+        reason = `Zoom refused the join: ${why}${code ? ` (error ${code})` : ''}. Fix it and press "Try again now".`;
+        $('action').hidden = false;
+      }
+      tick();
+    }
+  }
+
+  $('retry').addEventListener('click', () => location.reload());
+  join();
+})();
+</script>
+</body>
+</html>

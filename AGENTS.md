@@ -40,9 +40,13 @@ for Web, detects raised hands, and signals an ESP32 device on the chair's table 
 
 ## Layout
 
-No code yet. When adding it, keep the two programs apart, for example `console/` (technician's
-PC: localhost program and web page) and `firmware/` (ESP32), each with its own build and run
-instructions in a `README.md`.
+- `console/`: technician's PC, a localhost Node program (`server.mjs`, no dependencies) and the
+  web page (`index.html`). Config in `config.local.json`.
+- `firmware/`: ESP32-C3 with 0.42" OLED, PlatformIO (pioarduino platform, Arduino core 3.x).
+  Wi-Fi networks and token in `include/secrets.h`.
+- `spikes/`: throwaway tests; don't build on them.
+
+Each folder's `README.md` has build, run and test instructions.
 
 ## Working rules
 
