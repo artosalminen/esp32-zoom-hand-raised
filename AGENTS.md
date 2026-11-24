@@ -14,8 +14,10 @@ for Web, detects raised hands, and signals an ESP32 device on the chair's table 
   `docs/specification/README.md` and the relevant element files before changing behaviour.
 - One element per file. Edit the element files only; `README.md`, `STATUS.md` and `pages/` in
   that folder are generated and must not be edited by hand.
-- Change the specification through the capture workflow
-  (`/forge-planning-and-requirements:capture`), in the same pull request as the code.
+- Change the specification in the same pull request as the code. Follow the format of the
+  existing element files (frontmatter fields, fixed section headings, links by ID). New or
+  reopened elements are `draft` or `changed` until the change is merged, then `agreed`; retire
+  elements instead of deleting them.
 - Ideas that come up but aren't in scope go to `docs/specification/parked.md`, one dated line each.
 - Acceptance criteria (`AC-HAND-*`) define "done". Name tests after the criterion they verify.
 
