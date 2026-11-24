@@ -25,7 +25,7 @@ In a hybrid meeting, tell the chair through a device on their table that someone
 **Interfaces**
 
 - **Zoom:** the technician console joins the meeting under its configured name and receives each participant's raised-hand status.
-- **Device (ESP32), over Wi-Fi:** the technician console repeatedly tells the device the current state; the device shows it.
+- **Device (ESP32), over Wi-Fi:** the technician console repeatedly tells the device the current state and, for a device with a display, the number of raised remote hands; the device shows them.
 
 Source: [system-areas/BC-HAND-SIGNAL.md](../system-areas/BC-HAND-SIGNAL.md)
 
@@ -44,7 +44,7 @@ Source: [system-areas/BC-HAND-SIGNAL.md](../system-areas/BC-HAND-SIGNAL.md)
 
 *While the technician console is in the Zoom meeting, the device on the chair's table shows whether any remote participant has a raised hand, and shows plainly when the system can't tell.*
 
-Status: agreed · system-area: [BC-HAND-SIGNAL](#bc-hand-signal) · primary-actor: [ACT-CHAIR](actors.md#act-chair) · supporting-actors: [ACT-TECHNICIAN](actors.md#act-technician), [ACT-AV-TECHNICIAN](actors.md#act-av-technician) · governed-by: [CON-ZOOM-WEBSDK](#con-zoom-websdk) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state), [TERM-TECHNICIAN-CONSOLE](glossary.md#term-technician-console) · verified by: [AC-HAND-001](#ac-hand-001), [AC-HAND-002](#ac-hand-002), [AC-HAND-003](#ac-hand-003), [AC-HAND-004](#ac-hand-004), [AC-HAND-005](#ac-hand-005), [AC-HAND-007](#ac-hand-007)
+Status: agreed · system-area: [BC-HAND-SIGNAL](#bc-hand-signal) · primary-actor: [ACT-CHAIR](actors.md#act-chair) · supporting-actors: [ACT-TECHNICIAN](actors.md#act-technician), [ACT-AV-TECHNICIAN](actors.md#act-av-technician) · governed-by: [CON-ZOOM-WEBSDK](#con-zoom-websdk) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state), [TERM-TECHNICIAN-CONSOLE](glossary.md#term-technician-console) · verified by: [AC-HAND-001](#ac-hand-001), [AC-HAND-002](#ac-hand-002), [AC-HAND-003](#ac-hand-003), [AC-HAND-004](#ac-hand-004), [AC-HAND-005](#ac-hand-005), [AC-HAND-007](#ac-hand-007), [AC-HAND-008](#ac-hand-008), [AC-HAND-009](#ac-hand-009)
 
 <details><summary>Details</summary>
 
@@ -75,6 +75,7 @@ A remote participant raises their hand with Zoom's "Raise hand" feature.
 - Before 1, joining: when the console starts, it joins the saved meeting by itself, and the device shows **not watching** until the console is in the meeting. If the meeting hasn't started, the console tries again every 30 s. If it's in the waiting room, it waits there. Once admitted, the device shows the current state within 3 s.
 - At 2, more hands go up while the device shows **raised**: it stays **raised**. At 4, it shows **lowered** only when no remote participant's hand is raised.
 - At 3, a participant leaves the meeting with their hand raised: their hand no longer counts.
+- Where the device has a display, it also shows a number, updated within 3 s of any change in the number of raised remote hands or in the state: **0** when **lowered**; the number of remote participants with a raised hand, **1** to **9**, or **9+** above nine, when **raised**; a dash (**–**) when **not watching**, never a number.
 
 **Failure handling**
 
@@ -87,11 +88,11 @@ A remote participant raises their hand with Zoom's "Raise hand" feature.
 **Out of scope**
 
 - Zoom reactions other than "Raise hand", and hands raised on camera.
-- How many hands are raised, or whose.
+- Whose hands are raised, or in which order.
 - Dismissing the signal from the device; it follows Zoom only.
 - Breakout rooms: the console stays in the main meeting room.
 
-Referenced by: [AC-HAND-001](#ac-hand-001), [AC-HAND-002](#ac-hand-002), [AC-HAND-003](#ac-hand-003), [AC-HAND-004](#ac-hand-004), [AC-HAND-005](#ac-hand-005), [AC-HAND-007](#ac-hand-007)
+Referenced by: [AC-HAND-001](#ac-hand-001), [AC-HAND-002](#ac-hand-002), [AC-HAND-003](#ac-hand-003), [AC-HAND-004](#ac-hand-004), [AC-HAND-005](#ac-hand-005), [AC-HAND-007](#ac-hand-007), [AC-HAND-008](#ac-hand-008), [AC-HAND-009](#ac-hand-009)
 
 Source: [use-cases/UC-HAND-001.md](../use-cases/UC-HAND-001.md)
 
@@ -110,12 +111,16 @@ flowchart LR
   n_AC_HAND_004(["AC-HAND-004 The device shows not watching when the meeting ends"])
   n_AC_HAND_005(["AC-HAND-005 The device stays raised while any hand is still up"])
   n_AC_HAND_007(["AC-HAND-007 The console joins the saved meeting by itself once it starts"])
+  n_AC_HAND_008(["AC-HAND-008 A device with a display shows how many hands are raised"])
+  n_AC_HAND_009(["AC-HAND-009 The display shows a dash, not a number, when not watching"])
   n_AC_HAND_001 -->|verifies| n_UC_HAND_001
   n_AC_HAND_002 -->|verifies| n_UC_HAND_001
   n_AC_HAND_003 -->|verifies| n_UC_HAND_001
   n_AC_HAND_004 -->|verifies| n_UC_HAND_001
   n_AC_HAND_005 -->|verifies| n_UC_HAND_001
   n_AC_HAND_007 -->|verifies| n_UC_HAND_001
+  n_AC_HAND_008 -->|verifies| n_UC_HAND_001
+  n_AC_HAND_009 -->|verifies| n_UC_HAND_001
   n_AC_HAND_007 -->|verifies| n_CON_ZOOM_WEBSDK
 ```
 
@@ -254,6 +259,52 @@ Status: agreed · verifies: [UC-HAND-001](#uc-hand-001), [CON-ZOOM-WEBSDK](#con-
 Pins down joining without the technician's help: one 30-second retry at most, then 3 s to show the current state. It also proves the console joins without anyone signing in.
 
 Source: [acceptance-criteria/AC-HAND-007.md](../acceptance-criteria/AC-HAND-007.md)
+
+</details>
+
+<a id="ac-hand-008"></a>
+
+#### AC-HAND-008 A device with a display shows how many hands are raised
+
+*With two remote hands raised the display shows 2, and after one is lowered it shows 1, each within 3 seconds.*
+
+Status: agreed · verifies: [UC-HAND-001](#uc-hand-001) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state), [TERM-TECHNICIAN-CONSOLE](glossary.md#term-technician-console)
+
+<details><summary>Details</summary>
+
+- **Given** The device has a display; The technician console is in the Zoom meeting and the device is receiving its state; Two remote participants have a raised hand; The device shows raised and the display shows 2
+- **When** One of the two remote participants lowers their hand in Zoom
+- **Then** The display shows 1 within 3 s of the participant lowering their hand; The device still shows raised
+- Checked at: ui
+
+**Intent**
+
+Proves the display shows the count, not just "any hand raised": an "any hand" signal would still show something non-zero, but not change from 2 to 1.
+
+Source: [acceptance-criteria/AC-HAND-008.md](../acceptance-criteria/AC-HAND-008.md)
+
+</details>
+
+<a id="ac-hand-009"></a>
+
+#### AC-HAND-009 The display shows a dash, not a number, when not watching
+
+*When the console leaves the meeting while a hand is raised, the display replaces the count with a dash within 3 seconds.*
+
+Status: agreed · verifies: [UC-HAND-001](#uc-hand-001) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state), [TERM-TECHNICIAN-CONSOLE](glossary.md#term-technician-console)
+
+<details><summary>Details</summary>
+
+- **Given** The device has a display; The technician console is in the Zoom meeting and the device is receiving its state; One remote participant has a raised hand; The device shows raised and the display shows 1
+- **When** A host or co-host removes the technician console from the meeting
+- **Then** The device shows not watching within 3 s; The display shows "–" and no number
+- Checked at: ui
+
+**Intent**
+
+A count left on the display after the system stopped watching would look current and mislead the chair; this pins down that it's cleared.
+
+Source: [acceptance-criteria/AC-HAND-009.md](../acceptance-criteria/AC-HAND-009.md)
 
 </details>
 

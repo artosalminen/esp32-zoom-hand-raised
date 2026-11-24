@@ -11,6 +11,9 @@ sources:
   - kind: idea
     ref: Capture session with the user, rounds 2-3 (Q10, Q11) and review (R4, R5)
     date: 2026-11-24
+  - kind: idea
+    ref: Capture session, hand count on a display (Q1-Q5)
+    date: 2026-11-24
 ---
 
 ## Definition
@@ -21,7 +24,9 @@ What the device shows the chair, always exactly one of:
 - **raised**: at least one remote participant has a raised hand.
 - **not watching**: the system can't tell, because the console isn't in the meeting (not started, in the waiting room, left or removed), or the device isn't hearing from the technician's PC, or the device has just powered on.
 
-Each state is a different steady LED colour, with nothing blinking. The chair can tell the three apart from their seat, and none of them is dark. The exact colours are a hardware choice.
+Each state is a different steady colour, with nothing blinking, shown by LEDs or, where the device has a display, by the LEDs or the display's background. The chair can tell the three apart from their seat, and none of them is dark. The exact colours are a hardware choice.
+
+A **display** is a screen on the device, separate from the LEDs, that can show at least "9+" and "–". Its type is a hardware choice. Where there is one, it also shows the number of raised remote hands (UC-HAND-001); that number isn't part of the state.
 
 A **remote participant** is anyone in the Zoom meeting other than the technician console itself, including the room PC.
 

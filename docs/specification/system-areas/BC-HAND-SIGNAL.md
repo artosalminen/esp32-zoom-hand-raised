@@ -28,4 +28,4 @@ In a hybrid meeting, tell the chair through a device on their table that someone
 ## Interfaces
 
 - **Zoom:** the technician console joins the meeting under its configured name and receives each participant's raised-hand status.
-- **Device (ESP32), over Wi-Fi:** the technician console repeatedly tells the device the current state; the device shows it.
+- **Device (ESP32), over Wi-Fi:** the technician console repeatedly tells the device the current state and, for a device with a display, the number of raised remote hands; the device shows them.

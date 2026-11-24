@@ -19,6 +19,9 @@ sources:
   - kind: idea
     ref: Capture session with the user, rounds 1-4, review, and Web SDK test results
     date: 2026-11-24
+  - kind: idea
+    ref: Capture session, hand count on a display
+    date: 2026-11-24
 ---
 
 ## Goal
@@ -48,6 +51,7 @@ A remote participant raises their hand with Zoom's "Raise hand" feature.
 - Before 1, joining: when the console starts, it joins the saved meeting by itself, and the device shows **not watching** until the console is in the meeting. If the meeting hasn't started, the console tries again every 30 s. If it's in the waiting room, it waits there. Once admitted, the device shows the current state within 3 s.
 - At 2, more hands go up while the device shows **raised**: it stays **raised**. At 4, it shows **lowered** only when no remote participant's hand is raised.
 - At 3, a participant leaves the meeting with their hand raised: their hand no longer counts.
+- Where the device has a display, it also shows a number, updated within 3 s of any change in the number of raised remote hands or in the state: **0** when **lowered**; the number of remote participants with a raised hand, **1** to **9**, or **9+** above nine, when **raised**; a dash (**–**) when **not watching**, never a number.
 
 ## Failure handling
 
@@ -60,6 +64,6 @@ A remote participant raises their hand with Zoom's "Raise hand" feature.
 ## Out of scope
 
 - Zoom reactions other than "Raise hand", and hands raised on camera.
-- How many hands are raised, or whose.
+- Whose hands are raised, or in which order.
 - Dismissing the signal from the device; it follows Zoom only.
 - Breakout rooms: the console stays in the main meeting room.
