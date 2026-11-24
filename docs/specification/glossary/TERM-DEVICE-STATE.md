@@ -3,7 +3,7 @@ id: TERM-DEVICE-STATE
 type: glossary-term
 title: Device state
 summary: One of the three things the device on the chair's table can show - lowered, raised or not watching.
-status: draft
+status: agreed
 synonyms: []
 defined-in: BC-HAND-SIGNAL
 uses-terms: []

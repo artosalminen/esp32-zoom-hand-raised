@@ -3,7 +3,7 @@ id: AC-HAND-003
 type: acceptance-criterion
 title: The device shows not watching when the PC goes silent
 summary: When the device stops hearing from the PC, it shows not watching within 10 seconds, on its own.
-status: draft
+status: agreed
 verifies:
   - UC-HAND-001
 checked-at: ui

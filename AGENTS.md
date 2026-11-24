@@ -24,11 +24,14 @@ for Web, detects raised hands, and signals an ESP32 device on the chair's table 
 - Detection uses only the participant information from the Zoom Meeting SDK for Web in the
   technician console. No reading of the Zoom desktop client, screen capture, REST API or
   webhooks (`CON-ZOOM-WEBSDK`).
-- The console joins as the technician's own signed-in Zoom user (ZAK), because meetings are
-  hosted on another Zoom account. Not OBF.
+- The Zoom app lives in the Zoom account that hosts the meetings. The console joins with the
+  app's SDK signature only, under a configured name: no user sign-in, ZAK or OBF. An app from
+  another account is refused with error 4011 (tested; see `spikes/websdk-raise-hand/README.md`).
+- Re-read the whole participant list at least every 500 ms; don't rely on `user-updated` events
+  alone. "Lower all hands" can lower hands without sending an event for each. Events also arrive
+  twice.
 - The console is a page served at localhost by a program on the technician's PC. No cloud
-  server. The developer app's secret and the technician's Zoom tokens stay in that program and
-  are never sent to the browser page.
+  server. The Zoom app's secret stays in that program and is never sent to the browser page.
 - The console joins the saved meeting automatically, with no microphone or camera, and never
   unmutes. It retries every 30 s before the meeting starts and waits in the waiting room.
 - The program and the device talk over Wi-Fi. The device shows **not watching** on power-on and
@@ -44,5 +47,5 @@ instructions in a `README.md`.
 ## Working rules
 
 - Don't commit, push or open pull requests unless asked.
-- Never commit secrets: Zoom developer app credentials, Zoom tokens, Wi-Fi credentials, device
+- Never commit secrets: Zoom app credentials, Zoom tokens, Wi-Fi credentials, device
   addresses or meeting IDs and passcodes. Keep them in local, git-ignored config.

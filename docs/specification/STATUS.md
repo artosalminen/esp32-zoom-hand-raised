@@ -8,13 +8,13 @@ Generated from the element files. The readable specification starts at the [cont
 
 | Kind | Draft | Agreed | Changed | Retired |
 |---|---|---|---|---|
-| System areas | 1 | 0 | 0 | 0 |
-| Use cases | 1 | 0 | 0 | 0 |
-| Constraints | 1 | 0 | 0 | 1 |
-| Acceptance criteria | 6 | 0 | 0 | 1 |
-| Actors | 3 | 0 | 0 | 0 |
-| Assumptions | 1 | 0 | 0 | 1 |
-| Glossary terms | 2 | 0 | 0 | 0 |
+| System areas | 0 | 1 | 0 | 0 |
+| Use cases | 0 | 1 | 0 | 0 |
+| Constraints | 0 | 1 | 0 | 1 |
+| Acceptance criteria | 0 | 6 | 0 | 1 |
+| Actors | 0 | 3 | 0 | 0 |
+| Assumptions | 0 | 0 | 0 | 2 |
+| Glossary terms | 0 | 2 | 0 | 0 |
 
 ## Verifiability
 
@@ -30,6 +30,4 @@ None.
 
 ## Low-confidence assumptions
 
-| Assumption | Confirm with |
-|---|---|
-| [AS-WEBSDK-001](pages/hand-signal.md#as-websdk-001) A console joined to an outside meeting as the technician's signed-in user, without co-host rights, sees every participant's raised hand through the SDK within a second or two of each change. | developers |
+None.

@@ -3,7 +3,7 @@ id: ACT-CHAIR
 type: actor
 title: Chair
 summary: The person chairing a hybrid meeting from the front of the room, who gives the floor to both the in-person audience and the participants in Zoom.
-status: draft
+status: agreed
 actor-kind: person
 sources:
   - kind: idea

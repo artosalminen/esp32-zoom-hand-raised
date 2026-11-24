@@ -3,7 +3,7 @@ id: BC-HAND-SIGNAL
 type: system-area
 title: Hand signal
 summary: Notices raised hands in a Zoom meeting through the technician console, and shows them on a device on the chair's table.
-status: draft
+status: agreed
 sources:
   - kind: idea
     ref: Intention stated by the user in the capture session
@@ -27,5 +27,5 @@ In a hybrid meeting, tell the chair through a device on their table that someone
 
 ## Interfaces
 
-- **Zoom:** the technician console joins the meeting as the technician's Zoom user and receives each participant's raised-hand status.
+- **Zoom:** the technician console joins the meeting under its configured name and receives each participant's raised-hand status.
 - **Device (ESP32), over Wi-Fi:** the technician console repeatedly tells the device the current state; the device shows it.

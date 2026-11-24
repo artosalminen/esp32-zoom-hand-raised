@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Web SDK raise-hand spike</title>
+<style>
+  :root { --bg:#f6f7f9; --fg:#1b1f24; --muted:#5b6470; --card:#fff; --line:#d9dde3;
+          --lowered:#1f9d55; --raised:#d64545; --notwatching:#d08a00; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.45 system-ui, sans-serif; background:var(--bg); color:var(--fg); }
+  main { max-width:1100px; margin:0 auto; padding:16px; display:grid; gap:16px;
+         grid-template-columns: 1fr 1fr; }
+  section { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px 14px; }
+  h1 { font-size:18px; margin:0 0 4px; grid-column:1/-1; }
+  h2 { font-size:14px; margin:0 0 8px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+  .wide { grid-column:1/-1; }
+  button { font:inherit; padding:6px 12px; border-radius:6px; border:1px solid var(--line); background:#fff; cursor:pointer; }
+  button:disabled { opacity:.5; cursor:default; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  #device { font-size:28px; font-weight:700; color:#fff; text-align:center; border-radius:8px; padding:18px 8px; }
+  #device.lowered { background:var(--lowered); } #device.raised { background:var(--raised); }
+  #device.notwatching { background:var(--notwatching); }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:4px 6px; border-bottom:1px solid var(--line); }
+  td.hand { font-weight:700; color:var(--raised); }
+  #log { font:12px/1.4 ui-monospace, monospace; max-height:340px; overflow:auto; white-space:pre-wrap; margin:0; }
+  .muted { color:var(--muted); }
+  ol { margin:0; padding-left:20px; }
+  #zoomRoot { min-height:40px; }
+  @media (max-width: 800px) { main { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Web SDK raise-hand spike <span class="muted">(AS-WEBSDK-001, SDK 6.10.0, Component View)</span></h1>
+
+  <section>
+    <h2>Controls</h2>
+    <div class="row">
+      <a id="signin" href="/oauth/start"><button type="button">Sign in to Zoom</button></a>
+      <button id="signout" type="button">Sign out</button>
+      <button id="join" type="button" disabled>Join meeting</button>
+      <button id="mark" type="button" title="Shortcut: M">Mark (M)</button>
+      <button id="download" type="button">Download log</button>
+    </div>
+    <p id="status" class="muted">Loading…</p>
+    <p class="muted">Press <b>Mark</b> the moment someone raises or lowers a hand on the other device.
+      Each detection then shows the delay since the last mark.</p>
+  </section>
+
+  <section>
+    <h2>Device state preview</h2>
+    <div id="device" class="notwatching">not watching</div>
+    <p id="summary" class="muted"></p>
+  </section>
+
+  <section class="wide">
+    <h2>Participants (re-read every 500 ms)</h2>
+    <table>
+      <thead><tr><th>userId</th><th>Name</th><th>Me</th><th>Host</th><th>Co-host</th><th>Waiting room</th><th>Hand</th></tr></thead>
+      <tbody id="people"></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>What to check</h2>
+    <ol>
+      <li><b>Join outside meeting with ZAK</b>: the join succeeds for a meeting hosted on another Zoom account. If it fails, the log shows Zoom's reason.</li>
+      <li><b>No co-host needed</b>: with this console <i>not</i> co-host, hands raised by others appear in the table.</li>
+      <li><b>Within 2 s</b>: "Δ since mark" on detections stays under 2 s, for both raising and lowering, and for "Lower all hands".</li>
+      <li><b>Own row</b>: exactly one row is marked "me".</li>
+      <li><b>No Marketplace approval</b>: points 1–4 work with the app unpublished.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Event log</h2>
+    <pre id="log"></pre>
+  </section>
+
+  <section class="wide">
+    <h2>Zoom component</h2>
+    <p class="muted">Don't join audio or start video here. Use headphones or keep the PC away from the room.</p>
+    <div id="zoomRoot"></div>
+  </section>
+</main>
+
+<script src="https://source.zoom.us/6.10.0/lib/vendor/react.min.js"></script>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/react-dom.min.js"></script>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/redux.min.js"></script>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/redux-thunk.min.js"></script>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/react-redux.min.js"></script>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/lodash.min.js"></script>
+<script src="https://source.zoom.us/zoom-meeting-embedded-6.10.0.min.js"></script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const events = [];
+  let lastMark = null;
+  let connection = 'Closed';
+  let client = null;
+  let pollTimer = null;
+  const known = new Map(); // userId -> { name, hand }
+
+  function record(source, msg, data) {
+    const e = { iso: new Date().toISOString(), ms: Date.now(), source, msg };
+    if (data !== undefined) e.data = data;
+    if (lastMark && source !== 'mark') e.sinceMarkMs = e.ms - lastMark;
+    events.push(e);
+    const line = `${e.iso.slice(11, 23)}  [${source}] ${msg}` +
+      (e.sinceMarkMs !== undefined && /hand/i.test(msg) ? `   Δ since mark ${(e.sinceMarkMs / 1000).toFixed(2)} s` : '') +
+      (data !== undefined ? `\n    ${JSON.stringify(data)}` : '');
+    $('log').textContent = line + '\n' + $('log').textContent;
+    fetch('/api/log', { method: 'POST', body: JSON.stringify(e) }).catch(() => {});
+  }
+
+  function setStatus(text) { $('status').textContent = text; }
+
+  function deviceState(list, me) {
+    if (connection !== 'Connected' || !me || me.isHold) return 'notwatching';
+    return list.some((p) => p.userId !== me.userId && p.bRaiseHand && !p.isHold) ? 'raised' : 'lowered';
+  }
+
+  function poll() {
+    let list = [], me = null;
+    try { list = client.getAttendeeslist() || []; me = client.getCurrentUser(); } catch (err) { return; }
+    const seen = new Set();
+    for (const p of list) {
+      seen.add(p.userId);
+      const hand = !!p.bRaiseHand;
+      const prev = known.get(p.userId);
+      if (!prev) record('poll', `joined: ${p.displayName} (${p.userId})${hand ? ' with hand RAISED' : ''}`);
+      else if (prev.hand !== hand) record('poll', `hand ${hand ? 'RAISED' : 'lowered'}: ${p.displayName} (${p.userId})`);
+      known.set(p.userId, { name: p.displayName, hand });
+    }
+    for (const [id, v] of known) if (!seen.has(id)) { record('poll', `left: ${v.name} (${id})`); known.delete(id); }
+
+    const tbody = $('people');
+    tbody.replaceChildren(...list.map((p) => {
+      const tr = document.createElement('tr');
+      const cells = [p.userId, p.displayName, me && p.userId === me.userId ? 'me' : '',
+        p.isHost ? 'yes' : '', p.isCoHost ? 'yes' : '', p.isHold ? 'yes' : '', p.bRaiseHand ? '✋ raised' : ''];
+      cells.forEach((c, i) => { const td = document.createElement('td'); td.textContent = String(c); if (i === 6 && c) td.className = 'hand'; tr.append(td); });
+      return tr;
+    }));
+
+    const state = deviceState(list, me);
+    const el = $('device');
+    el.className = state;
+    el.textContent = state === 'notwatching' ? 'not watching' : state;
+    const raised = me ? list.filter((p) => p.userId !== me.userId && p.bRaiseHand).length : 0;
+    $('summary').textContent = `${list.length} participants · ${raised} remote hands raised · me: ${me ? `${me.displayName} (${me.userId})${me.isCoHost ? ', co-host' : ''}${me.isHost ? ', host' : ''}` : 'unknown'}`;
+  }
+
+  async function join() {
+    $('join').disabled = true;
+    let step = 'fetch join params';
+    try {
+      const res = await fetch('/api/join-params', { method: 'POST' });
+      const params = await res.json();
+      if (!res.ok) throw new Error(params.error || `HTTP ${res.status}`);
+      record('page', `joining meeting ${params.meetingNumber} as "${params.userName}" with ${params.obfToken ? 'OBF token' : params.zak ? 'ZAK' : 'no user token'}`);
+
+      step = 'createClient';
+      client = ZoomMtgEmbedded.createClient();
+      step = 'init';
+      await client.init({ zoomAppRoot: $('zoomRoot'), language: 'en-US', patchJsMedia: true, leaveOnPageUnload: true });
+      step = 'register listeners';
+      client.on('connection-change', (p) => { connection = p && p.state; record('event', `connection-change: ${connection}`, p); });
+      client.on('user-added', (p) => record('event', 'user-added', p));
+      client.on('user-removed', (p) => record('event', 'user-removed', p));
+      client.on('user-updated', (p) => {
+        const list = Array.isArray(p) ? p : [p];
+        for (const u of list) {
+          if (u && 'bRaiseHand' in u) record('event', `user-updated hand ${u.bRaiseHand ? 'RAISED' : 'lowered'}: ${u.displayName || ''} (${u.userId})`, u);
+          else record('event', 'user-updated (no bRaiseHand field)', u);
+        }
+      });
+
+      step = 'join';
+      await client.join(params);
+      connection = 'Connected';
+      record('page', 'join succeeded');
+      setStatus('Joined. Raise and lower hands on other devices and press Mark each time.');
+      pollTimer = setInterval(poll, 500);
+    } catch (err) {
+      const detail = err && typeof err === 'object' ? { ...err, message: err.message, stack: err.stack } : String(err);
+      record('join-error', `join failed at step: ${step}`, detail);
+      setStatus(`Join failed: ${err && (err.reason || err.message || err.type) || err}. See the event log.`);
+      $('join').disabled = false;
+    }
+  }
+
+  function download() {
+    const blob = new Blob([JSON.stringify(events, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `websdk-spike-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function mark() { lastMark = Date.now(); record('mark', 'tester mark'); }
+
+  window.addEventListener('error', (e) => record('page-error', String(e.message), { stack: e.error && e.error.stack }));
+  window.addEventListener('unhandledrejection', (e) => {
+    const r = e.reason;
+    record('page-error', 'unhandled rejection', r && typeof r === 'object' ? { ...r, message: r.message, stack: r.stack } : String(r));
+  });
+
+  $('join').addEventListener('click', join);
+  $('mark').addEventListener('click', mark);
+  $('download').addEventListener('click', download);
+  document.addEventListener('keydown', (e) => { if ((e.key === 'm' || e.key === 'M') && !e.target.closest('input, textarea')) mark(); });
+
+  $('signout').addEventListener('click', async () => { await fetch('/api/sign-out', { method: 'POST' }); location.reload(); });
+
+  fetch('/api/status').then((r) => r.json()).then((s) => {
+    const mode = s.authMode === 'obf' ? 'OBF (on behalf of a user already in the meeting)'
+      : s.authMode === 'none' ? 'none (SDK signature only, same-account meeting)' : 'ZAK (as the signed-in user)';
+    if (!s.meetingNumber) setStatus('No meeting number in config.local.json.');
+    else if (s.authMode === 'none') { setStatus(`Meeting ${s.meetingNumber}. Mode: ${mode}. Ready to join; no sign-in needed.`); $('join').disabled = false; }
+    else if (!s.signedIn) setStatus(`Meeting ${s.meetingNumber}. Mode: ${mode}. Sign in to Zoom first.`);
+    else { setStatus(`Signed in as ${s.signedInAs || 'unknown'}. Meeting ${s.meetingNumber}. Mode: ${mode}. Ready to join.`); $('join').disabled = false; }
+  }).catch(() => setStatus('Server not reachable.'));
+})();
+</script>
+</body>
+</html>

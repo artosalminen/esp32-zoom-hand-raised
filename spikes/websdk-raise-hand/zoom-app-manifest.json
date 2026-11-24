@@ -1,0 +1,31 @@
+{
+  "display_information": {
+    "display_name": "Hand Signal Console Spike",
+    "description": "Test console that detects raised hands in a Zoom meeting and signals a desk device.",
+    "long_description": "Internal test app. Joins a meeting through the Meeting SDK for Web, reads participants' raised-hand status, and shows it to a person chairing a hybrid meeting. Runs only on localhost."
+  },
+  "oauth_information": {
+    "usage": "USER_OPERATION",
+    "development_redirect_uri": "http://localhost:8787/oauth/callback",
+    "oauth_allow_list": [
+      "http://localhost:8787/oauth/callback"
+    ],
+    "strict_mode": false,
+    "subdomain_strict_mode": false,
+    "scopes": [
+      { "scope": "user:read:user", "optional": false },
+      { "scope": "user:read:zak", "optional": false },
+      { "scope": "user:read:token", "optional": false }
+    ],
+    "scope_description": "Reads the signed-in user's name, and gets a ZAK or On Behalf Of token so the console can join the meeting for that user."
+  },
+  "features": {
+    "embed": {
+      "meeting_sdk": {
+        "enable": true,
+        "enable_device": false,
+        "devices": []
+      }
+    }
+  }
+}

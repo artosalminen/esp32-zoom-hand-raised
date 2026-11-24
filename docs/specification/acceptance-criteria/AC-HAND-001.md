@@ -3,7 +3,7 @@ id: AC-HAND-001
 type: acceptance-criterion
 title: A raised hand shows on the device within 3 s
 summary: When a remote participant raises their hand, the device changes from lowered to raised within 3 seconds.
-status: draft
+status: agreed
 verifies:
   - UC-HAND-001
 checked-at: ui

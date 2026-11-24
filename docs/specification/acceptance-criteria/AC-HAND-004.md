@@ -3,7 +3,7 @@ id: AC-HAND-004
 type: acceptance-criterion
 title: The device shows not watching when the meeting ends
 summary: When the host ends the meeting, the device shows not watching within 3 seconds.
-status: draft
+status: agreed
 verifies:
   - UC-HAND-001
 checked-at: ui

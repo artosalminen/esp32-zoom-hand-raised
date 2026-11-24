@@ -7,4 +7,4 @@
 | Term | Definition | Synonyms | ID |
 |---|---|---|---|
 | <a id="term-device-state"></a>Device state | One of the three things the device on the chair's table can show - lowered, raised or not watching. |  | [TERM-DEVICE-STATE](../glossary/TERM-DEVICE-STATE.md) |
-| <a id="term-technician-console"></a>Technician console | The part of the system on the technician's own PC that joins the Zoom meeting as the technician's Zoom user, watches for raised hands and tells the device what to show. | console | [TERM-TECHNICIAN-CONSOLE](../glossary/TERM-TECHNICIAN-CONSOLE.md) |
+| <a id="term-technician-console"></a>Technician console | The part of the system on the technician's own PC that joins the Zoom meeting under a configured name, watches for raised hands and tells the device what to show. | console | [TERM-TECHNICIAN-CONSOLE](../glossary/TERM-TECHNICIAN-CONSOLE.md) |

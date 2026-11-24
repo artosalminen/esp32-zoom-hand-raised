@@ -33,5 +33,3 @@ Acceptance criteria are written next to what they verify.
   - [UC-HAND-001](pages/hand-signal.md#uc-hand-001) Show a raised hand on the chair's device
 - Constraints
   - [CON-ZOOM-WEBSDK](pages/hand-signal.md#con-zoom-websdk) Detect raised hands with the Zoom Meeting SDK for Web in the technician console
-- Assumptions
-  - [AS-WEBSDK-001](pages/hand-signal.md#as-websdk-001) The Web SDK shows every raised hand to an ordinary participant joined with ZAK

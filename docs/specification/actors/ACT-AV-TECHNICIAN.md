@@ -3,7 +3,7 @@ id: ACT-AV-TECHNICIAN
 type: actor
 title: AV technician
 summary: The person who runs the meeting room's audio and video in Zoom on the room PC with the standard Zoom desktop client.
-status: draft
+status: agreed
 actor-kind: person
 sources:
   - kind: idea

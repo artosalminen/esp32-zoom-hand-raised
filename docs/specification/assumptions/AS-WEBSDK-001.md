@@ -3,7 +3,7 @@ id: AS-WEBSDK-001
 type: assumption
 title: The Web SDK shows every raised hand to an ordinary participant joined with ZAK
 summary: A console joined to an outside meeting as the technician's signed-in user, without co-host rights, sees every participant's raised hand through the SDK within a second or two of each change.
-status: draft
+status: retired
 confidence: low
 confirm-with: developers
 affects:
@@ -24,6 +24,8 @@ sources:
 5. A developer app that isn't published or approved on the Zoom Marketplace may join meetings on another account with ZAK; if approval is needed, it can be obtained for an internal-only app.
 
 ## Basis
+
+**Tested 2026-11-24 and retired** (results in `spikes/websdk-raise-hand/README.md`): point 1 and point 5 were wrong, since joining another account's meeting fails with error 4011 with ZAK or OBF. An app created in the hosting account joins without either. Points 2, 3 and 4 held, and "Lower all hands" sent an event for only one of two hands, so the list must be re-read. CON-ZOOM-WEBSDK and UC-HAND-001 were corrected accordingly.
 
 Zoom documents `bRaiseHand` and says the participant-update event fires on raise hand. Developers have counted raised hands with `bRaiseHand` since 2020. Nothing found says whether non-hosts see others' hands. Forum reports show bugs: "Lower all hands" updating only one hand (2021, SDK 2.0.0) and disconnects tied to the update listener (2025, SDK 3.12.0); neither is confirmed fixed. Nobody has tested this.
 

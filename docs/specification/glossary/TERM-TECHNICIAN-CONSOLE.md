@@ -2,8 +2,8 @@
 id: TERM-TECHNICIAN-CONSOLE
 type: glossary-term
 title: Technician console
-summary: The part of the system on the technician's own PC that joins the Zoom meeting as the technician's Zoom user, watches for raised hands and tells the device what to show.
-status: draft
+summary: The part of the system on the technician's own PC that joins the Zoom meeting under a configured name, watches for raised hands and tells the device what to show.
+status: agreed
 synonyms:
   - console
 defined-in: BC-HAND-SIGNAL
@@ -16,7 +16,7 @@ sources:
 
 ## Definition
 
-What the technician runs on their own PC. It joins the meeting as the technician's signed-in Zoom user, with no microphone and no camera, and never unmutes. It reads which participants have a raised hand and tells the device the current state over Wi-Fi. In the meeting it's one participant, shown under the technician's name.
+What the technician runs on their own PC. It joins the meeting under the name set in its configuration, with no microphone and no camera, and never unmutes. It reads which participants have a raised hand and tells the device the current state over Wi-Fi. In the meeting it's one participant.
 
 ## Distinguish from
 

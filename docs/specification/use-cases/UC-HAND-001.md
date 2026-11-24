@@ -3,7 +3,7 @@ id: UC-HAND-001
 type: use-case
 title: Show a raised hand on the chair's device
 summary: While the technician console is in the Zoom meeting, the device on the chair's table shows whether any remote participant has a raised hand, and shows plainly when the system can't tell.
-status: draft
+status: agreed
 system-area: BC-HAND-SIGNAL
 primary-actor: ACT-CHAIR
 supporting-actors:
@@ -17,7 +17,7 @@ uses-terms:
 open-questions: []
 sources:
   - kind: idea
-    ref: Capture session with the user, rounds 1-4 and review
+    ref: Capture session with the user, rounds 1-4, review, and Web SDK test results
     date: 2026-11-24
 ---
 
@@ -31,7 +31,8 @@ A remote participant raises their hand with Zoom's "Raise hand" feature.
 
 ## Preconditions
 
-- The technician has signed in to Zoom in the console, the usual meeting ID and passcode are saved, and the console is running.
+- The meeting is hosted on the Zoom account the console's Zoom app belongs to (CON-ZOOM-WEBSDK).
+- The usual meeting ID and passcode are saved in the console, and the console is running.
 - The console has joined the meeting, with no microphone and no camera, and has been admitted from the waiting room. It doesn't need to be co-host.
 - The technician's PC and the device are on a Wi-Fi network where they can reach each other, and the device is powered on the chair's table.
 
@@ -51,10 +52,9 @@ A remote participant raises their hand with Zoom's "Raise hand" feature.
 ## Failure handling
 
 - After power-on, the device shows **not watching** until it receives a state from the technician's PC.
-- If Zoom refuses the join (wrong saved meeting ID or passcode, meeting locked, app not authorised), the console shows the technician the reason, and the device shows **not watching**.
+- If Zoom refuses the join (wrong saved meeting ID or passcode, meeting locked, meeting hosted on another account, Meeting SDK turned off in the Zoom app), the console shows the technician the reason, and the device shows **not watching**.
 - If the console leaves the meeting, is removed, or the meeting ends, the device shows **not watching** within 3 s.
 - If the device hears nothing from the technician's PC for 10 s (console stopped, PC off or asleep, Wi-Fi lost, the network blocks the two from reaching each other), the device shows **not watching** on its own.
-- If the technician's sign-in can't be renewed, the console asks them to sign in again, and the device shows **not watching** until the console is back in the meeting.
 - If the device loses power, it's dark, which the chair can see is not **lowered**.
 
 ## Out of scope

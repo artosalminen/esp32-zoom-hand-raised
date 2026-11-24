@@ -3,7 +3,7 @@ id: AC-HAND-002
 type: acceptance-criterion
 title: The device returns to lowered within 3 s of the last hand going down
 summary: When the only raised hand is lowered, the device changes from raised to lowered within 3 seconds.
-status: draft
+status: agreed
 verifies:
   - UC-HAND-001
 checked-at: ui

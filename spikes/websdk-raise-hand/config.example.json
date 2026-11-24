@@ -1,0 +1,9 @@
+{
+  "clientId": "YOUR_GENERAL_APP_CLIENT_ID",
+  "clientSecret": "YOUR_GENERAL_APP_CLIENT_SECRET",
+  "meetingNumber": "",
+  "passcode": "",
+  "userName": "",
+  "authMode": "none",
+  "port": 8787
+}

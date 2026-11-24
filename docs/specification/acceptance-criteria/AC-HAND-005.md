@@ -3,7 +3,7 @@ id: AC-HAND-005
 type: acceptance-criterion
 title: The device stays raised while any hand is still up
 summary: With two remote hands raised, lowering one keeps the device on raised; it shows lowered only after the second is lowered.
-status: draft
+status: agreed
 verifies:
   - UC-HAND-001
 checked-at: ui
