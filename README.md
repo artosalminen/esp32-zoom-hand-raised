@@ -24,7 +24,8 @@ The device shows one of three states. Noticing a raised hand matters most; the c
 | **not watching** | light `-` and the device's IP address (or "no wifi") | off | The system can't tell: the console isn't in the meeting, or the device isn't hearing from it. |
 
 A completely dark device has no power. Optionally, an external WS2812 RGB LED shows the states
-as colours (green, red, amber).
+as colours (green, red, amber): three wires (5V, GND, data to GPIO4) and one build setting. See
+[wiring the optional RGB LED](firmware/README.md#optional-rgb-led-ws2812).
 
 ```
 Zoom meeting ──(Meeting SDK for Web)──▶ technician console (PC, localhost)

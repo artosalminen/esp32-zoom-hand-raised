@@ -25,9 +25,44 @@ OLED" board). The OLED is on I2C **SDA = GPIO5, SCL = GPIO6**. If your board use
 The board's OLED is monochrome. As the spec allows for a device without an RGB LED
 ([TERM-DEVICE-STATE](../docs/specification/glossary/TERM-DEVICE-STATE.md)), it tells the states
 apart with symbols: **raised** lights the whole screen, so it's the easiest to notice; lowered
-and not watching are a light `0` or `-` on a dark screen. To add state colours as well, wire one
-WS2812 RGB LED (3V3, GND, data) and uncomment `-DRGB_LED_PIN=4` (or your data pin) in
-`platformio.ini`.
+and not watching are a light `0` or `-` on a dark screen. To show the states as colours as well,
+add the optional RGB LED below.
+
+### Optional RGB LED (WS2812)
+
+One addressable WS2812B ("NeoPixel") LED shows **green** for lowered, **red** for raised and
+**amber** for not watching, steady, next to the OLED. Use a single-LED breakout board; it has
+three or four pads: `5V`/`VCC`, `GND`, `DIN` (data in) and sometimes `DOUT`, which stays unused.
+
+| LED pad | Board pin | Notes |
+|---|---|---|
+| `VCC` / `5V` | `5V` | Powered from USB. If the colours flicker or are wrong, use `3V3` instead: the LED is a bit dimmer, but the 3.3 V data signal is then within its spec. |
+| `GND` | `G` / `GND` | |
+| `DIN` | `GPIO4` | Through a 330 Ω resistor in series if you have one; it protects the LED's input. |
+
+```
+ ESP32-C3 board                 WS2812B breakout
+ ┌──────────────┐               ┌─────────────┐
+ │           5V ├───────────────┤ VCC         │
+ │          GND ├───────────────┤ GND         │
+ │        GPIO4 ├───[330 Ω]─────┤ DIN    DOUT ├── (unused)
+ └──────────────┘               └─────────────┘
+```
+
+Then turn it on in `platformio.ini` by uncommenting this line in `build_flags`:
+
+```ini
+  -DRGB_LED_PIN=4
+```
+
+and flash again (`pio run -t upload`). Brightness defaults to 60 of 255; change it with
+`-DRGB_BRIGHTNESS=<0-255>`. The board's own built-in LED keeps blinking while raised; the RGB LED
+stays steady.
+
+Use a different data pin only if GPIO4 is taken, and then avoid: GPIO5 and GPIO6 (OLED), GPIO8
+(built-in LED), GPIO2 and GPIO9 (boot pins), GPIO18 and GPIO19 (USB), GPIO20 and GPIO21 (serial).
+If you don't have a breakout board, a bare WS2812B also needs a 100 nF capacitor between its VCC
+and GND, close to the LED.
 
 ## Set up
 
