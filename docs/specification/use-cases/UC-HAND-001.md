@@ -17,6 +17,9 @@ uses-terms:
 open-questions: []
 sources:
   - kind: idea
+    ref: Capture session, blinking built-in LED (Q1-Q4); deliberately overrides the earlier no-blinking decision for this one LED
+    date: 2026-11-24
+  - kind: idea
     ref: Capture session with the user, rounds 1-4, review, and Web SDK test results
     date: 2026-11-24
   - kind: idea
@@ -56,6 +59,7 @@ A remote participant raises their hand with Zoom's "Raise hand" feature.
 - At 3, a participant leaves the meeting with their hand raised: their hand no longer counts.
 - Where the device has a display, the chair must notice **raised** before anything else; how many hands are raised is secondary and must never make **raised** harder to notice. The display shows a number, updated within 3 s of any change in the number of raised remote hands or in the state: **0** when **lowered**; the number of remote participants with a raised hand, **1** to **9**, or **9+** above nine, when **raised**; a dash (**–**) when **not watching**, never a number.
 - Where the display is monochrome, whether or not an RGB LED is also fitted: **raised** lights the whole display, with the number dark on the lit background. **Lowered** shows a light "0" on an otherwise unlit display. **Not watching** shows a light "–" and a line of text: the device's address when it's on Wi-Fi, otherwise "no wifi". **Lowered** and **raised** may also show a short label.
+- Where the device has a built-in LED and blinking is turned on in its firmware build setting (on by default), the built-in LED blinks twice a second while the state is **raised**, however many hands are raised, and keeps its rhythm when that number changes. It's off when **lowered** or **not watching**.
 
 ## Failure handling
 

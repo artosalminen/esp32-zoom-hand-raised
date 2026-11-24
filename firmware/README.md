@@ -10,6 +10,12 @@ Shows the state the technician console sends ([UC-HAND-001](../docs/specificatio
 
 It shows **not watching** on power-on and after 10 s without a message from the console.
 
+The board's built-in LED (GPIO8, lit when the pin is low) blinks twice a second while the state
+is **raised** and is off otherwise ([AC-HAND-011](../docs/specification/acceptance-criteria/AC-HAND-011.md),
+[AC-HAND-012](../docs/specification/acceptance-criteria/AC-HAND-012.md)). To turn it off, uncomment
+`-DBLINK_WHEN_RAISED=0` in `platformio.ini`. If it's lit when it should be off, set
+`-DBUILTIN_LED_ACTIVE_LOW=0`.
+
 ## Hardware
 
 Written for an ESP32-C3 board with a 0.42" 72×40 SSD1306 OLED (e.g. the diymore "ESP32-C3 0.42

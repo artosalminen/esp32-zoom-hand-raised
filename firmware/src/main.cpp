@@ -5,6 +5,7 @@
 //   raised        "1".."9","9+"  inverted display, red RGB LED
 //   not watching  "-"            normal display, amber RGB LED
 // Shows "not watching" on power-on and after 10 s without a message.
+// The board's built-in LED blinks twice a second while raised (BLINK_WHEN_RAISED, on by default).
 //
 // HTTP API (port 80):
 //   POST /state   form fields: state=lowered|raised|not_watching, count=<n>, token=<DEVICE_TOKEN>
@@ -32,6 +33,16 @@
 #ifndef RGB_BRIGHTNESS
 #define RGB_BRIGHTNESS 60
 #endif
+#ifndef BLINK_WHEN_RAISED
+#define BLINK_WHEN_RAISED 1  // UC-HAND-001: blink the built-in LED while raised; 0 turns it off
+#endif
+#ifndef BUILTIN_LED_PIN
+#define BUILTIN_LED_PIN 8  // ESP32-C3 boards: built-in LED on GPIO8; -1: none
+#endif
+#ifndef BUILTIN_LED_ACTIVE_LOW
+#define BUILTIN_LED_ACTIVE_LOW 1  // lit when the pin is low
+#endif
+static constexpr uint32_t BLINK_HALF_PERIOD_MS = 250;  // 2 blinks per second
 
 #if RGB_LED_PIN >= 0
 #include <Adafruit_NeoPixel.h>
@@ -119,6 +130,14 @@ static void render() {
   setLed();
 }
 
+// Built-in LED: blinks while raised, off otherwise (UC-HAND-001, AC-HAND-011).
+static void updateBuiltinLed() {
+#if BLINK_WHEN_RAISED && BUILTIN_LED_PIN >= 0
+  const bool on = state == HandState::Raised && (millis() / BLINK_HALF_PERIOD_MS) % 2 == 0;
+  digitalWrite(BUILTIN_LED_PIN, (on != (BUILTIN_LED_ACTIVE_LOW != 0)) ? HIGH : LOW);
+#endif
+}
+
 static void setState(HandState s, int count) {
   if (s != state || count != raisedCount) dirty = true;
   state = s;
@@ -164,6 +183,10 @@ void setup() {
   pixel.setBrightness(RGB_BRIGHTNESS);
 #endif
 
+#if BLINK_WHEN_RAISED && BUILTIN_LED_PIN >= 0
+  pinMode(BUILTIN_LED_PIN, OUTPUT);
+#endif
+  updateBuiltinLed();  // off
   render();  // power-on: not watching (UC-HAND-001 failure handling)
 
   WiFi.mode(WIFI_STA);
@@ -202,5 +225,6 @@ void loop() {
     dirty = false;
     render();
   }
+  updateBuiltinLed();
   delay(5);
 }

@@ -44,7 +44,7 @@ Source: [system-areas/BC-HAND-SIGNAL.md](../system-areas/BC-HAND-SIGNAL.md)
 
 *While the technician console is in the Zoom meeting, the device on the chair's table shows whether any remote participant has a raised hand, and shows plainly when the system can't tell.*
 
-Status: agreed · system-area: [BC-HAND-SIGNAL](#bc-hand-signal) · primary-actor: [ACT-CHAIR](actors.md#act-chair) · supporting-actors: [ACT-TECHNICIAN](actors.md#act-technician), [ACT-AV-TECHNICIAN](actors.md#act-av-technician) · governed-by: [CON-ZOOM-WEBSDK](#con-zoom-websdk) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state), [TERM-TECHNICIAN-CONSOLE](glossary.md#term-technician-console) · verified by: [AC-HAND-001](#ac-hand-001), [AC-HAND-002](#ac-hand-002), [AC-HAND-003](#ac-hand-003), [AC-HAND-004](#ac-hand-004), [AC-HAND-005](#ac-hand-005), [AC-HAND-007](#ac-hand-007), [AC-HAND-008](#ac-hand-008), [AC-HAND-009](#ac-hand-009), [AC-HAND-010](#ac-hand-010)
+Status: agreed · system-area: [BC-HAND-SIGNAL](#bc-hand-signal) · primary-actor: [ACT-CHAIR](actors.md#act-chair) · supporting-actors: [ACT-TECHNICIAN](actors.md#act-technician), [ACT-AV-TECHNICIAN](actors.md#act-av-technician) · governed-by: [CON-ZOOM-WEBSDK](#con-zoom-websdk) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state), [TERM-TECHNICIAN-CONSOLE](glossary.md#term-technician-console) · verified by: [AC-HAND-001](#ac-hand-001), [AC-HAND-002](#ac-hand-002), [AC-HAND-003](#ac-hand-003), [AC-HAND-004](#ac-hand-004), [AC-HAND-005](#ac-hand-005), [AC-HAND-007](#ac-hand-007), [AC-HAND-008](#ac-hand-008), [AC-HAND-009](#ac-hand-009), [AC-HAND-010](#ac-hand-010), [AC-HAND-011](#ac-hand-011), [AC-HAND-012](#ac-hand-012)
 
 <details><summary>Details</summary>
 
@@ -77,6 +77,7 @@ A remote participant raises their hand with Zoom's "Raise hand" feature.
 - At 3, a participant leaves the meeting with their hand raised: their hand no longer counts.
 - Where the device has a display, the chair must notice **raised** before anything else; how many hands are raised is secondary and must never make **raised** harder to notice. The display shows a number, updated within 3 s of any change in the number of raised remote hands or in the state: **0** when **lowered**; the number of remote participants with a raised hand, **1** to **9**, or **9+** above nine, when **raised**; a dash (**–**) when **not watching**, never a number.
 - Where the display is monochrome, whether or not an RGB LED is also fitted: **raised** lights the whole display, with the number dark on the lit background. **Lowered** shows a light "0" on an otherwise unlit display. **Not watching** shows a light "–" and a line of text: the device's address when it's on Wi-Fi, otherwise "no wifi". **Lowered** and **raised** may also show a short label.
+- Where the device has a built-in LED and blinking is turned on in its firmware build setting (on by default), the built-in LED blinks twice a second while the state is **raised**, however many hands are raised, and keeps its rhythm when that number changes. It's off when **lowered** or **not watching**.
 
 **Failure handling**
 
@@ -93,7 +94,7 @@ A remote participant raises their hand with Zoom's "Raise hand" feature.
 - Dismissing the signal from the device; it follows Zoom only.
 - Breakout rooms: the console stays in the main meeting room.
 
-Referenced by: [AC-HAND-001](#ac-hand-001), [AC-HAND-002](#ac-hand-002), [AC-HAND-003](#ac-hand-003), [AC-HAND-004](#ac-hand-004), [AC-HAND-005](#ac-hand-005), [AC-HAND-007](#ac-hand-007), [AC-HAND-008](#ac-hand-008), [AC-HAND-009](#ac-hand-009), [AC-HAND-010](#ac-hand-010)
+Referenced by: [AC-HAND-001](#ac-hand-001), [AC-HAND-002](#ac-hand-002), [AC-HAND-003](#ac-hand-003), [AC-HAND-004](#ac-hand-004), [AC-HAND-005](#ac-hand-005), [AC-HAND-007](#ac-hand-007), [AC-HAND-008](#ac-hand-008), [AC-HAND-009](#ac-hand-009), [AC-HAND-010](#ac-hand-010), [AC-HAND-011](#ac-hand-011), [AC-HAND-012](#ac-hand-012)
 
 Source: [use-cases/UC-HAND-001.md](../use-cases/UC-HAND-001.md)
 
@@ -115,6 +116,8 @@ flowchart LR
   n_AC_HAND_008(["AC-HAND-008 A device with a display shows how many hands are raised"])
   n_AC_HAND_009(["AC-HAND-009 The display shows a dash, not a number, when not watching"])
   n_AC_HAND_010(["AC-HAND-010 On a monochrome display, a raised hand lights the whole screen"])
+  n_AC_HAND_011(["AC-HAND-011 The built-in LED blinks while a hand is raised"])
+  n_AC_HAND_012(["AC-HAND-012 The built-in LED stops blinking when the last hand goes down"])
   n_AC_HAND_001 -->|verifies| n_UC_HAND_001
   n_AC_HAND_002 -->|verifies| n_UC_HAND_001
   n_AC_HAND_003 -->|verifies| n_UC_HAND_001
@@ -124,6 +127,8 @@ flowchart LR
   n_AC_HAND_008 -->|verifies| n_UC_HAND_001
   n_AC_HAND_009 -->|verifies| n_UC_HAND_001
   n_AC_HAND_010 -->|verifies| n_UC_HAND_001
+  n_AC_HAND_011 -->|verifies| n_UC_HAND_001
+  n_AC_HAND_012 -->|verifies| n_UC_HAND_001
   n_AC_HAND_007 -->|verifies| n_CON_ZOOM_WEBSDK
 ```
 
@@ -331,6 +336,52 @@ Status: agreed · verifies: [UC-HAND-001](#uc-hand-001) · uses-terms: [TERM-DEV
 Noticing that someone has raised a hand is the most important thing the device does. Without colours, the change from a mostly unlit to a fully lit screen is what makes it noticeable.
 
 Source: [acceptance-criteria/AC-HAND-010.md](../acceptance-criteria/AC-HAND-010.md)
+
+</details>
+
+<a id="ac-hand-011"></a>
+
+#### AC-HAND-011 The built-in LED blinks while a hand is raised
+
+*With blinking turned on, the built-in LED starts blinking about twice a second within 3 seconds of a hand going up.*
+
+Status: agreed · verifies: [UC-HAND-001](#uc-hand-001) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state), [TERM-TECHNICIAN-CONSOLE](glossary.md#term-technician-console)
+
+<details><summary>Details</summary>
+
+- **Given** The device has a built-in LED and blinking is turned on in its firmware build setting; The technician console is in the Zoom meeting and the device is receiving its state; No remote participant has a raised hand and the built-in LED is off
+- **When** A remote participant raises their hand in Zoom
+- **Then** Within 3 s of the participant raising it, the built-in LED starts blinking; Counted over 5 s, it flashes 9 to 11 times
+- Checked at: ui
+
+**Intent**
+
+Noticing a raised hand comes first, and a blinking light catches the eye. AC-HAND-012 covers the LED stopping again.
+
+Source: [acceptance-criteria/AC-HAND-011.md](../acceptance-criteria/AC-HAND-011.md)
+
+</details>
+
+<a id="ac-hand-012"></a>
+
+#### AC-HAND-012 The built-in LED stops blinking when the last hand goes down
+
+*With blinking turned on, the built-in LED is off within 3 seconds of the last raised hand being lowered, and stays off.*
+
+Status: agreed · verifies: [UC-HAND-001](#uc-hand-001) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state), [TERM-TECHNICIAN-CONSOLE](glossary.md#term-technician-console)
+
+<details><summary>Details</summary>
+
+- **Given** The device has a built-in LED and blinking is turned on in its firmware build setting; The technician console is in the Zoom meeting and the device is receiving its state; Exactly one remote participant has a raised hand and the built-in LED is blinking
+- **When** That remote participant lowers their hand in Zoom
+- **Then** Within 3 s of the participant lowering it, the built-in LED is off; The built-in LED stays off for the next 10 s
+- Checked at: ui
+
+**Intent**
+
+A light that keeps blinking after every hand is down would make the chair look for a hand that isn't there.
+
+Source: [acceptance-criteria/AC-HAND-012.md](../acceptance-criteria/AC-HAND-012.md)
 
 </details>
 

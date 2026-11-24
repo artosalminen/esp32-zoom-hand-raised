@@ -36,7 +36,9 @@ for Web, detects raised hands, and signals an ESP32 device on the chair's table 
   unmutes. It retries every 30 s before the meeting starts and waits in the waiting room.
 - The program and the device talk over Wi-Fi. The device shows **not watching** on power-on and
   after 10 s without a message.
-- Device states are three distinct steady LED colours, no blinking (`TERM-DEVICE-STATE`).
+- Device states are three distinct steady colours (RGB LED) or symbols (monochrome display), no
+  blinking, with one exception: the board's single-colour built-in LED blinks twice a second
+  while raised (`BLINK_WHEN_RAISED`, on by default; `TERM-DEVICE-STATE`, `UC-HAND-001`).
 
 ## Layout
 
