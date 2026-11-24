@@ -15,10 +15,10 @@ Thanks for helping. This project is small; these few rules keep it that way.
 2. Keep each pull request to one intention: one behaviour change, with its specification
    elements, code and tests.
 3. Link tests to the acceptance criteria they verify (`AC-HAND-*`).
-4. Don't commit secrets: Wi-Fi credentials, device addresses or meeting details belong in local,
-   git-ignored configuration.
-5. Describe in the pull request how you tested it, on which Zoom version and in which client
-   language (English or Finnish).
+4. Don't commit secrets: Zoom developer app credentials, Zoom tokens, Wi-Fi credentials, device
+   addresses and meeting IDs or passcodes belong in local, git-ignored configuration.
+5. Describe in the pull request how you tested it, and with which Zoom Meeting SDK for Web
+   version.
 
 ## Specification files
 
@@ -28,5 +28,5 @@ Thanks for helping. This project is small; these few rules keep it that way.
 
 ## Reporting problems
 
-Open an issue with the Zoom version, the client language, what the device showed and what you
-expected.
+Open an issue with the Zoom Meeting SDK for Web version, what the console and the device showed,
+and what you expected.

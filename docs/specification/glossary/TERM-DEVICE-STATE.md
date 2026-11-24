@@ -17,15 +17,15 @@ sources:
 
 What the device shows the chair, always exactly one of:
 
-- **lowered**: the PC can see the meeting's Participants panel and no remote participant has a raised hand.
+- **lowered**: the technician console is in the meeting and no remote participant has a raised hand.
 - **raised**: at least one remote participant has a raised hand.
-- **not watching**: the system can't tell, because the PC can't see the Participants panel, or the device isn't hearing from the PC, or the device has just powered on.
+- **not watching**: the system can't tell, because the console isn't in the meeting (not started, in the waiting room, left or removed), or the device isn't hearing from the technician's PC, or the device has just powered on.
 
 Each state is a different steady LED colour, with nothing blinking. The chair can tell the three apart from their seat, and none of them is dark. The exact colours are a hardware choice.
 
-A **remote participant** is anyone in the Zoom meeting other than the room PC's own Zoom user.
+A **remote participant** is anyone in the Zoom meeting other than the technician console itself, including the room PC.
 
 ## Distinguish from
 
 - A dark device: it has no power; that isn't a device state.
-- Zoom's own raised-hand status: the device state follows it, but only as seen by the room PC.
+- Zoom's own raised-hand status: the device state follows it, but only as seen by the technician console.

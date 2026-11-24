@@ -4,7 +4,8 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Python (watcher)
+# Technician console (language not decided yet)
+node_modules/
 __pycache__/
 *.py[cod]
 .venv/

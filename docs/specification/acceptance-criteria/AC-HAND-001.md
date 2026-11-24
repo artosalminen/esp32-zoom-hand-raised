@@ -9,14 +9,15 @@ verifies:
 checked-at: ui
 verifiability: verifiable
 given:
-  - The room PC is in a Zoom meeting with the Participants panel open and the watcher running
+  - The technician console is in the Zoom meeting and the device is receiving its state
   - No hand is raised in the meeting
   - The device shows lowered
 when: A remote participant raises their hand in Zoom
 then:
-  - The device shows raised within 3 s of the hand appearing as raised in the room PC's Participants panel
+  - The device shows raised within 3 s of the participant raising it
 uses-terms:
   - TERM-DEVICE-STATE
+  - TERM-TECHNICIAN-CONSOLE
 sources:
   - kind: idea
     ref: Capture session with the user, round 1 (Q3)

@@ -6,7 +6,7 @@
 
 <a id="bc-hand-signal"></a>
 
-*Notices raised hands in a Zoom meeting, as seen by the meeting room's Windows PC, and shows them on a device on the chair's table.*
+*Notices raised hands in a Zoom meeting through the technician console, and shows them on a device on the chair's table.*
 
 Status: draft
 
@@ -17,14 +17,15 @@ In a hybrid meeting, tell the chair through a device on their table that someone
 **Boundaries**
 
 - Raising and lowering hands, and running the meeting, belong to Zoom.
-- Detection works only through what the Zoom desktop client shows on the meeting room's Windows PC; it doesn't add a participant or use Zoom's servers (CON-ZOOM-UIA).
+- The room's audio and video belong to the AV technician's Zoom desktop client on the room PC.
+- Detection works only through the technician console (CON-ZOOM-WEBSDK).
 - Hands raised by the in-person audience aren't detected.
 - The chair's tablet isn't part of the system.
 
 **Interfaces**
 
-- **Zoom desktop client (Windows):** the watcher on the PC reads the meeting window and the Participants panel.
-- **Device (ESP32), over Wi-Fi:** the watcher on the PC repeatedly tells the device the current state; the device shows it.
+- **Zoom:** the technician console joins the meeting as the technician's Zoom user and receives each participant's raised-hand status.
+- **Device (ESP32), over Wi-Fi:** the technician console repeatedly tells the device the current state; the device shows it.
 
 Source: [system-areas/BC-HAND-SIGNAL.md](../system-areas/BC-HAND-SIGNAL.md)
 
@@ -33,9 +34,9 @@ Source: [system-areas/BC-HAND-SIGNAL.md](../system-areas/BC-HAND-SIGNAL.md)
 - [Use cases](#use-cases)
   - [UC-HAND-001](#uc-hand-001) Show a raised hand on the chair's device
 - [Constraints](#constraints)
-  - [CON-ZOOM-UIA](#con-zoom-uia) Detect raised hands from the Zoom desktop client's accessibility information
+  - [CON-ZOOM-WEBSDK](#con-zoom-websdk) Detect raised hands with the Zoom Meeting SDK for Web in the technician console
 - [Assumptions](#assumptions)
-  - [AS-ZOOM-UIA-001](#as-zoom-uia-001) The Participants panel exposes every raised hand and the own row through UI Automation
+  - [AS-WEBSDK-001](#as-websdk-001) The Web SDK shows every raised hand to an ordinary participant joined with ZAK
 
 ## Use cases
 
@@ -43,9 +44,9 @@ Source: [system-areas/BC-HAND-SIGNAL.md](../system-areas/BC-HAND-SIGNAL.md)
 
 ### UC-HAND-001 Show a raised hand on the chair's device
 
-*While the meeting room's PC is in a Zoom meeting, the device on the chair's table shows whether any remote participant has a raised hand, and shows plainly when the system can't tell.*
+*While the technician console is in the Zoom meeting, the device on the chair's table shows whether any remote participant has a raised hand, and shows plainly when the system can't tell.*
 
-Status: draft · system-area: [BC-HAND-SIGNAL](#bc-hand-signal) · primary-actor: [ACT-CHAIR](actors.md#act-chair) · supporting-actors: [ACT-TECHNICIAN](actors.md#act-technician) · governed-by: [CON-ZOOM-UIA](#con-zoom-uia) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state) · verified by: [AC-HAND-001](#ac-hand-001), [AC-HAND-002](#ac-hand-002), [AC-HAND-003](#ac-hand-003), [AC-HAND-004](#ac-hand-004), [AC-HAND-005](#ac-hand-005), [AC-HAND-006](#ac-hand-006)
+Status: draft · system-area: [BC-HAND-SIGNAL](#bc-hand-signal) · primary-actor: [ACT-CHAIR](actors.md#act-chair) · supporting-actors: [ACT-TECHNICIAN](actors.md#act-technician), [ACT-AV-TECHNICIAN](actors.md#act-av-technician) · governed-by: [CON-ZOOM-WEBSDK](#con-zoom-websdk) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state), [TERM-TECHNICIAN-CONSOLE](glossary.md#term-technician-console) · verified by: [AC-HAND-001](#ac-hand-001), [AC-HAND-002](#ac-hand-002), [AC-HAND-003](#ac-hand-003), [AC-HAND-004](#ac-hand-004), [AC-HAND-005](#ac-hand-005), [AC-HAND-007](#ac-hand-007)
 
 <details><summary>Details</summary>
 
@@ -59,27 +60,30 @@ A remote participant raises their hand with Zoom's "Raise hand" feature.
 
 **Preconditions**
 
-- The technician has joined the meeting with the Zoom desktop client on the room's Windows PC, has the Participants panel open, and has the watcher running.
-- The PC and the device are on a Wi-Fi network where they can reach each other, and the device is powered on the chair's table.
+- The technician has signed in to Zoom in the console, the usual meeting ID and passcode are saved, and the console is running.
+- The console has joined the meeting, with no microphone and no camera, and has been admitted from the waiting room. It doesn't need to be co-host.
+- The technician's PC and the device are on a Wi-Fi network where they can reach each other, and the device is powered on the chair's table.
 
 **Main flow**
 
 1. A remote participant raises their hand in Zoom.
-2. Within 3 s of the hand showing as raised in the room PC's Participants panel, the device shows **raised**.
-3. The chair gives the floor; the participant lowers their hand, or the technician or host lowers it in Zoom.
+2. Within 3 s, the device shows **raised**.
+3. The chair gives the floor; the participant lowers their hand, or a host or co-host lowers it in Zoom.
 4. Within 3 s of the last raised hand being lowered, the device shows **lowered**.
 
 **Alternative flows**
 
-- At 1, a hand raised by the room PC's own Zoom user is ignored; the device stays as it was.
+- Before 1, joining: when the console starts, it joins the saved meeting by itself, and the device shows **not watching** until the console is in the meeting. If the meeting hasn't started, the console tries again every 30 s. If it's in the waiting room, it waits there. Once admitted, the device shows the current state within 3 s.
 - At 2, more hands go up while the device shows **raised**: it stays **raised**. At 4, it shows **lowered** only when no remote participant's hand is raised.
 - At 3, a participant leaves the meeting with their hand raised: their hand no longer counts.
 
 **Failure handling**
 
-- After power-on, the device shows **not watching** until it receives a state from the PC.
-- If the Participants panel is closed, the meeting ends, or Zoom stops running, the device shows **not watching** within 3 s. When the panel is open again in a meeting, the device shows the current state within 3 s.
-- If the device hears nothing from the PC for 10 s (watcher stopped, PC off or asleep, Wi-Fi lost, the network blocks the two from reaching each other), the device shows **not watching** on its own.
+- After power-on, the device shows **not watching** until it receives a state from the technician's PC.
+- If Zoom refuses the join (wrong saved meeting ID or passcode, meeting locked, app not authorised), the console shows the technician the reason, and the device shows **not watching**.
+- If the console leaves the meeting, is removed, or the meeting ends, the device shows **not watching** within 3 s.
+- If the device hears nothing from the technician's PC for 10 s (console stopped, PC off or asleep, Wi-Fi lost, the network blocks the two from reaching each other), the device shows **not watching** on its own.
+- If the technician's sign-in can't be renewed, the console asks them to sign in again, and the device shows **not watching** until the console is back in the meeting.
 - If the device loses power, it's dark, which the chair can see is not **lowered**.
 
 **Out of scope**
@@ -87,9 +91,9 @@ A remote participant raises their hand with Zoom's "Raise hand" feature.
 - Zoom reactions other than "Raise hand", and hands raised on camera.
 - How many hands are raised, or whose.
 - Dismissing the signal from the device; it follows Zoom only.
-- Breakout rooms: the room PC stays in the main meeting room.
+- Breakout rooms: the console stays in the main meeting room.
 
-Referenced by: [AC-HAND-001](#ac-hand-001), [AC-HAND-002](#ac-hand-002), [AC-HAND-003](#ac-hand-003), [AC-HAND-004](#ac-hand-004), [AC-HAND-005](#ac-hand-005), [AC-HAND-006](#ac-hand-006), [AS-ZOOM-UIA-001](#as-zoom-uia-001)
+Referenced by: [AC-HAND-001](#ac-hand-001), [AC-HAND-002](#ac-hand-002), [AC-HAND-003](#ac-hand-003), [AC-HAND-004](#ac-hand-004), [AC-HAND-005](#ac-hand-005), [AC-HAND-007](#ac-hand-007), [AS-WEBSDK-001](#as-websdk-001)
 
 Source: [use-cases/UC-HAND-001.md](../use-cases/UC-HAND-001.md)
 
@@ -100,21 +104,21 @@ Source: [use-cases/UC-HAND-001.md](../use-cases/UC-HAND-001.md)
 ```mermaid
 flowchart LR
   n_UC_HAND_001["UC-HAND-001 Show a raised hand on the chair's device"]
-  n_CON_ZOOM_UIA["CON-ZOOM-UIA Detect raised hands from the Zoom desktop client's accessibility information"]
-  n_CON_ZOOM_UIA -->|applies to| n_UC_HAND_001
+  n_CON_ZOOM_WEBSDK["CON-ZOOM-WEBSDK Detect raised hands with the Zoom Meeting SDK for Web in the technician console"]
+  n_CON_ZOOM_WEBSDK -->|applies to| n_UC_HAND_001
   n_AC_HAND_001(["AC-HAND-001 A raised hand shows on the device within 3 s"])
   n_AC_HAND_002(["AC-HAND-002 The device returns to lowered within 3 s of the last hand going down"])
   n_AC_HAND_003(["AC-HAND-003 The device shows not watching when the PC goes silent"])
-  n_AC_HAND_004(["AC-HAND-004 The device shows not watching when the Participants panel is closed"])
+  n_AC_HAND_004(["AC-HAND-004 The device shows not watching when the meeting ends"])
   n_AC_HAND_005(["AC-HAND-005 The device stays raised while any hand is still up"])
-  n_AC_HAND_006(["AC-HAND-006 The room PC's own raised hand is ignored"])
+  n_AC_HAND_007(["AC-HAND-007 The console joins the saved meeting by itself once it starts"])
   n_AC_HAND_001 -->|verifies| n_UC_HAND_001
   n_AC_HAND_002 -->|verifies| n_UC_HAND_001
   n_AC_HAND_003 -->|verifies| n_UC_HAND_001
   n_AC_HAND_004 -->|verifies| n_UC_HAND_001
   n_AC_HAND_005 -->|verifies| n_UC_HAND_001
-  n_AC_HAND_006 -->|verifies| n_UC_HAND_001
-  n_AC_HAND_004 -->|verifies| n_CON_ZOOM_UIA
+  n_AC_HAND_007 -->|verifies| n_UC_HAND_001
+  n_AC_HAND_007 -->|verifies| n_CON_ZOOM_WEBSDK
 ```
 
 <a id="ac-hand-001"></a>
@@ -123,13 +127,13 @@ flowchart LR
 
 *When a remote participant raises their hand, the device changes from lowered to raised within 3 seconds.*
 
-Status: draft · verifies: [UC-HAND-001](#uc-hand-001) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state)
+Status: draft · verifies: [UC-HAND-001](#uc-hand-001) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state), [TERM-TECHNICIAN-CONSOLE](glossary.md#term-technician-console)
 
 <details><summary>Details</summary>
 
-- **Given** The room PC is in a Zoom meeting with the Participants panel open and the watcher running; No hand is raised in the meeting; The device shows lowered
+- **Given** The technician console is in the Zoom meeting and the device is receiving its state; No hand is raised in the meeting; The device shows lowered
 - **When** A remote participant raises their hand in Zoom
-- **Then** The device shows raised within 3 s of the hand appearing as raised in the room PC's Participants panel
+- **Then** The device shows raised within 3 s of the participant raising it
 - Checked at: ui
 
 **Intent**
@@ -146,13 +150,13 @@ Source: [acceptance-criteria/AC-HAND-001.md](../acceptance-criteria/AC-HAND-001.
 
 *When the only raised hand is lowered, the device changes from raised to lowered within 3 seconds.*
 
-Status: draft · verifies: [UC-HAND-001](#uc-hand-001) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state)
+Status: draft · verifies: [UC-HAND-001](#uc-hand-001) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state), [TERM-TECHNICIAN-CONSOLE](glossary.md#term-technician-console)
 
 <details><summary>Details</summary>
 
-- **Given** The room PC is in a Zoom meeting with the Participants panel open and the watcher running; Exactly one remote participant has a raised hand; The device shows raised
+- **Given** The technician console is in the Zoom meeting and the device is receiving its state; Exactly one remote participant has a raised hand; The device shows raised
 - **When** That remote participant lowers their hand in Zoom
-- **Then** The device shows lowered within 3 s of the hand appearing as lowered in the room PC's Participants panel
+- **Then** The device shows lowered within 3 s of the participant lowering it
 - Checked at: ui
 
 **Intent**
@@ -169,18 +173,18 @@ Source: [acceptance-criteria/AC-HAND-002.md](../acceptance-criteria/AC-HAND-002.
 
 *When the device stops hearing from the PC, it shows not watching within 10 seconds, on its own.*
 
-Status: draft · verifies: [UC-HAND-001](#uc-hand-001) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state)
+Status: draft · verifies: [UC-HAND-001](#uc-hand-001) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state), [TERM-TECHNICIAN-CONSOLE](glossary.md#term-technician-console)
 
 <details><summary>Details</summary>
 
-- **Given** The room PC is in a Zoom meeting with the Participants panel open and the watcher running; The device shows lowered
-- **When** The watcher on the PC is stopped
+- **Given** The technician console is in the Zoom meeting and the device is receiving its state; The device shows lowered
+- **When** The program on the technician's PC is stopped
 - **Then** The device shows not watching within 10 s
 - Checked at: ui
 
 **Intent**
 
-The chair must never trust a "lowered" that nobody is backing up. This tests only the watcher being stopped. The PC going to sleep and Wi-Fi being lost aren't tested here; the use case's 10-second rule covers them.
+The chair must never trust a "lowered" that nobody is backing up. This tests only the console program being stopped. The PC going to sleep and Wi-Fi being lost aren't tested here; the use case's 10-second rule covers them.
 
 Source: [acceptance-criteria/AC-HAND-003.md](../acceptance-criteria/AC-HAND-003.md)
 
@@ -188,22 +192,22 @@ Source: [acceptance-criteria/AC-HAND-003.md](../acceptance-criteria/AC-HAND-003.
 
 <a id="ac-hand-004"></a>
 
-#### AC-HAND-004 The device shows not watching when the Participants panel is closed
+#### AC-HAND-004 The device shows not watching when the meeting ends
 
-*When the PC can no longer see the Participants panel, the device shows not watching within 3 seconds.*
+*When the host ends the meeting, the device shows not watching within 3 seconds.*
 
-Status: draft · verifies: [UC-HAND-001](#uc-hand-001), [CON-ZOOM-UIA](#con-zoom-uia) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state)
+Status: draft · verifies: [UC-HAND-001](#uc-hand-001) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state), [TERM-TECHNICIAN-CONSOLE](glossary.md#term-technician-console)
 
 <details><summary>Details</summary>
 
-- **Given** The room PC is in a Zoom meeting with the Participants panel open and the watcher running; The device shows lowered
-- **When** The technician closes the Participants panel
+- **Given** The technician console is in the Zoom meeting and the device is receiving its state; The device shows lowered
+- **When** The host ends the meeting for all
 - **Then** The device shows not watching within 3 s
 - Checked at: ui
 
 **Intent**
 
-Closing the panel is the likeliest way to lose detection without anything crashing. The meeting ending or Zoom closing should behave the same way.
+The meeting ends every time, while the console keeps running; the chair must not be left with a "lowered" nobody is backing up. The console being removed or sent back to the waiting room is covered by UC-HAND-001's failure handling and should behave the same way.
 
 Source: [acceptance-criteria/AC-HAND-004.md](../acceptance-criteria/AC-HAND-004.md)
 
@@ -215,11 +219,11 @@ Source: [acceptance-criteria/AC-HAND-004.md](../acceptance-criteria/AC-HAND-004.
 
 *With two remote hands raised, lowering one keeps the device on raised; it shows lowered only after the second is lowered.*
 
-Status: draft · verifies: [UC-HAND-001](#uc-hand-001) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state)
+Status: draft · verifies: [UC-HAND-001](#uc-hand-001) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state), [TERM-TECHNICIAN-CONSOLE](glossary.md#term-technician-console)
 
 <details><summary>Details</summary>
 
-- **Given** The room PC is in a Zoom meeting with the Participants panel open and the watcher running; Two remote participants have a raised hand; The device shows raised
+- **Given** The technician console is in the Zoom meeting and the device is receiving its state; Two remote participants have a raised hand; The device shows raised
 - **When** One of the two remote participants lowers their hand in Zoom
 - **Then** The device still shows raised 5 s later
 - Checked at: ui
@@ -232,93 +236,98 @@ Source: [acceptance-criteria/AC-HAND-005.md](../acceptance-criteria/AC-HAND-005.
 
 </details>
 
-<a id="ac-hand-006"></a>
+<a id="ac-hand-007"></a>
 
-#### AC-HAND-006 The room PC's own raised hand is ignored
+#### AC-HAND-007 The console joins the saved meeting by itself once it starts
 
-*A hand raised by the room PC's own Zoom user doesn't change the device from lowered.*
+*A console started before the meeting joins on its own, and the device goes from not watching to lowered within 33 seconds of the console being admitted.*
 
-Status: draft · verifies: [UC-HAND-001](#uc-hand-001) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state)
+Status: draft · verifies: [UC-HAND-001](#uc-hand-001), [CON-ZOOM-WEBSDK](#con-zoom-websdk) · uses-terms: [TERM-DEVICE-STATE](glossary.md#term-device-state), [TERM-TECHNICIAN-CONSOLE](glossary.md#term-technician-console)
 
 <details><summary>Details</summary>
 
-- **Given** The room PC is in a Zoom meeting with the Participants panel open and the watcher running; No hand is raised in the meeting; The device shows lowered
-- **When** The technician raises the room PC's own hand in Zoom
-- **Then** The device still shows lowered 5 s later
+- **Given** The technician is signed in, and the usual meeting ID and passcode are saved in the console; The meeting, hosted on another Zoom account, hasn't started; The console has been started and the device shows not watching
+- **When** The host starts the meeting and admits the console from the waiting room as soon as it appears there
+- **Then** The console appears in the meeting under the technician's name, with no microphone and no camera; The device shows lowered within 33 s of the meeting starting
 - Checked at: ui
 
 **Intent**
 
-Only remote participants' hands count; the room PC's own hand would otherwise light the device for a hand nobody in Zoom is waiting with.
+Pins down joining without the technician's help: one 30-second retry at most, then 3 s to show the current state. It also proves the console can join a meeting on another account as the technician.
 
-Source: [acceptance-criteria/AC-HAND-006.md](../acceptance-criteria/AC-HAND-006.md)
+Source: [acceptance-criteria/AC-HAND-007.md](../acceptance-criteria/AC-HAND-007.md)
 
 </details>
 
 ## Constraints
 
-<a id="con-zoom-uia"></a>
+<a id="con-zoom-websdk"></a>
 
-### CON-ZOOM-UIA Detect raised hands from the Zoom desktop client's accessibility information
+### CON-ZOOM-WEBSDK Detect raised hands with the Zoom Meeting SDK for Web in the technician console
 
-*Raised hands are detected only by reading the accessibility information (Windows UI Automation) that the Zoom desktop client exposes on the user's own PC.*
+*Raised hands are detected only by the technician console, built on the Zoom Meeting SDK for Web and joined as the technician's own signed-in Zoom user, with no cloud server.*
 
-Status: draft · verified by: [AC-HAND-004](#ac-hand-004)
+Status: draft · uses-terms: [TERM-TECHNICIAN-CONSOLE](glossary.md#term-technician-console) · verified by: [AC-HAND-007](#ac-hand-007)
 
 <details><summary>Details</summary>
 
 **Constraint**
 
-The system shall learn which participants have a raised hand only from the accessibility information that the Zoom desktop client for Windows exposes through Windows UI Automation, on the meeting room's PC that the technician has in the meeting.
+The system shall learn which participants have a raised hand only from the participant information the Zoom Meeting SDK for Web gives the technician console. The console runs on the technician's own PC and joins the meeting as the technician's own signed-in Zoom user (ZAK token).
 
 **Rationale**
 
-It runs locally, needs no Zoom developer app, account approval or extra participant in the meeting, and can be built quickly. A Meeting SDK bot would be more robust but is visible to everyone in the meeting and much more work to build. Reading pixels from the screen breaks with themes, scaling and overlapping windows.
+The participant information carries a raised-hand flag, so detection doesn't depend on the Zoom client's display language, an open panel or rows in view. The meetings are hosted on a Zoom account other than the one the developer app is created in. Since 2026-03-02, Zoom requires SDK apps joining such meetings to be attributed to a signed-in user. An OBF token only works while that user is already in the meeting on another client, which the technician isn't, so the console joins as the technician themselves.
 
 **Consequences**
 
-- Rules out a Zoom Meeting SDK bot, Zoom REST APIs or webhooks, and screen capture or OCR.
-- The Participants panel has to be open (docked or popped out) for raised hands to be visible.
-- The Zoom client may be set to English or Finnish, so the watcher recognises the raised-hand and own-row text in both.
-- Zoom updates may change that text. The technician can change it in a configuration file, without a new version of the watcher.
-- Works only with the Zoom desktop client on Windows.
+- Rules out reading the Zoom desktop client's screen-reader information or the screen, and Zoom REST APIs or webhooks.
+- The console is a web page served at localhost by a small program on the technician's PC. There's no cloud server.
+- The program keeps the technician's Zoom sign-in, renews it, and gets the token the page joins with.
+- A Zoom developer app signs the join requests. Its secret is never sent to the browser page; only the program on the technician's PC holds it.
+- The program, not the page, talks to the device over Wi-Fi.
+- The technician needs a Zoom account.
+- The console is a participant in the meeting, visible to everyone under the technician's name.
+- The room's own audio and video stay on the Zoom desktop client, run by the AV technician.
 
-Referenced by: [AC-HAND-004](#ac-hand-004), [AS-ZOOM-UIA-001](#as-zoom-uia-001), [UC-HAND-001](#uc-hand-001)
+Referenced by: [AC-HAND-007](#ac-hand-007), [AS-WEBSDK-001](#as-websdk-001), [UC-HAND-001](#uc-hand-001)
 
-Source: [constraints/CON-ZOOM-UIA.md](../constraints/CON-ZOOM-UIA.md)
+Source: [constraints/CON-ZOOM-WEBSDK.md](../constraints/CON-ZOOM-WEBSDK.md)
 
 </details>
 
 ## Assumptions
 
-<a id="as-zoom-uia-001"></a>
+<a id="as-websdk-001"></a>
 
-### AS-ZOOM-UIA-001 The Participants panel exposes every raised hand and the own row through UI Automation
+### AS-WEBSDK-001 The Web SDK shows every raised hand to an ordinary participant joined with ZAK
 
-*Through UI Automation, the Zoom desktop client's Participants panel exposes every participant's row, including rows scrolled out of view, with an accessible name that marks a raised hand and marks the room PC's own row, in English and in Finnish.*
+*A console joined to an outside meeting as the technician's signed-in user, without co-host rights, sees every participant's raised hand through the SDK within a second or two of each change.*
 
-Status: draft · affects: [CON-ZOOM-UIA](#con-zoom-uia), [UC-HAND-001](#uc-hand-001)
+Status: draft · affects: [CON-ZOOM-WEBSDK](#con-zoom-websdk), [UC-HAND-001](#uc-hand-001)
 
 <details><summary>Details</summary>
 
 **Assumption**
 
-In the Zoom desktop client for Windows, through UI Automation:
-1. Every participant row in the Participants panel can be read, including rows scrolled out of view.
-2. A row's accessible name contains a fixed phrase while that participant's hand is raised (for example "raised hand"), and doesn't otherwise.
-3. The room PC's own row can be recognised (for example by "(me)").
-4. Points 2 and 3 hold with the client set to English and set to Finnish, each with its own known phrases.
+1. A Meeting SDK for Web client can join a meeting hosted on another Zoom account using the technician's ZAK token.
+2. Joined as an ordinary participant (not host or co-host), it receives every other participant's raised-hand flag (`bRaiseHand`) in the participant list.
+3. A raise or lower is visible to the console within 2 s, either through the participant-update event or by re-reading the participant list.
+4. The console's own participant can be told apart from the others.
+5. A developer app that isn't published or approved on the Zoom Marketplace may join meetings on another account with ZAK; if approval is needed, it can be obtained for an internal-only app.
 
 **Basis**
 
-Zoom supports screen readers, which read out each participant's state, including a raised hand. Nobody has checked yet with inspect.exe or Accessibility Insights on the room's Zoom version, in either language.
+Zoom documents `bRaiseHand` and says the participant-update event fires on raise hand. Developers have counted raised hands with `bRaiseHand` since 2020. Nothing found says whether non-hosts see others' hands. Forum reports show bugs: "Lower all hands" updating only one hand (2021, SDK 2.0.0) and disconnects tied to the update listener (2025, SDK 3.12.0); neither is confirmed fixed. Nobody has tested this.
 
 **If wrong**
 
-- Point 1: Zoom lists raised hands first, so a raised hand would rarely be out of view. If rows out of view can't be read, the watcher can read only the visible rows, and the spec must say so. A hidden raised hand would show a false **lowered**.
-- Point 2 or 3: look for another UI Automation property that carries the state (an icon element's name, help text) before giving up on CON-ZOOM-UIA. Otherwise reopen the choice of approach, with the Meeting SDK bot next in line.
-- Point 4: support only the language that works, and require the technician to set the client to it.
+- Point 1: the console can't join; reconsider OBF with the technician also on Zoom desktop, or a meeting on the app's own account.
+- Point 2: the console must be co-host before it detects hands; until then the device shows **not watching**.
+- Point 3: re-read the participant list on a timer and accept a longer limit than 3 s in UC-HAND-001.
+- Point 4: recognise the console's own participant by the name it joins with.
+- Point 5: the console can't join outside meetings until the app is approved; if approval isn't available, reconsider the approach.
 
-Source: [assumptions/AS-ZOOM-UIA-001.md](../assumptions/AS-ZOOM-UIA-001.md)
+Source: [assumptions/AS-WEBSDK-001.md](../assumptions/AS-WEBSDK-001.md)
 
 </details>

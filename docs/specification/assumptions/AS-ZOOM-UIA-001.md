@@ -3,7 +3,7 @@ id: AS-ZOOM-UIA-001
 type: assumption
 title: The Participants panel exposes every raised hand and the own row through UI Automation
 summary: Through UI Automation, the Zoom desktop client's Participants panel exposes every participant's row, including rows scrolled out of view, with an accessible name that marks a raised hand and marks the room PC's own row, in English and in Finnish.
-status: draft
+status: retired
 confidence: low
 confirm-with: developers
 affects:

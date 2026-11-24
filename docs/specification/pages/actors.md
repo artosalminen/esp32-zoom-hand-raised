@@ -4,6 +4,33 @@
 
 [Contents](../README.md)
 
+<a id="act-av-technician"></a>
+
+## ACT-AV-TECHNICIAN AV technician
+
+*The person who runs the meeting room's audio and video in Zoom on the room PC with the standard Zoom desktop client.*
+
+Status: draft
+
+<details><summary>Details</summary>
+
+**Goals**
+
+Get the room's camera, microphone, speakers and shared video into the meeting, and keep them working.
+
+**Responsibilities**
+
+- Runs the room PC with the standard Zoom desktop client: shares video and audio.
+- Admits people from the waiting room, including the technician's console.
+- Makes the technician co-host (needed for managing participants, not for detecting hands).
+- Doesn't use the technician console or the device.
+
+Referenced by: [UC-HAND-001](hand-signal.md#uc-hand-001)
+
+Source: [actors/ACT-AV-TECHNICIAN.md](../actors/ACT-AV-TECHNICIAN.md)
+
+</details>
+
 <a id="act-chair"></a>
 
 ## ACT-CHAIR Chair
@@ -21,7 +48,7 @@ Notice promptly when a participant in Zoom raises a hand, without having to keep
 **Responsibilities**
 
 - Chairs the meeting and decides who speaks; the system only signals that a hand is raised.
-- Doesn't operate the Windows PC or the watcher.
+- Doesn't operate the technician console or the room PC.
 
 Referenced by: [UC-HAND-001](hand-signal.md#uc-hand-001)
 
@@ -33,7 +60,7 @@ Source: [actors/ACT-CHAIR.md](../actors/ACT-CHAIR.md)
 
 ## ACT-TECHNICIAN Technician
 
-*The person who runs the meeting room's Windows PC that is in the Zoom meeting, and sets up the device for the chair.*
+*The person who runs the technician console on their own PC, in the meeting under their own Zoom account, and sets up the device for the chair.*
 
 Status: draft
 
@@ -41,14 +68,17 @@ Status: draft
 
 **Goals**
 
-Set the device up once before the meeting and then not have to think about it.
+Set up the console and the device once, and then have them work for every meeting without thinking about it.
 
 **Responsibilities**
 
-- Joins the meeting with the Zoom desktop client on the Windows PC and keeps the Participants panel open (docked or popped out) for the whole meeting.
-- Starts the watcher on the PC.
-- Connects the PC and the device to a Wi-Fi network on which they can reach each other: sets the device's Wi-Fi details and the watcher's device address before the meeting.
+- Has a Zoom account, and signs in to it once in the technician console on their own PC.
+- Saves the usual meeting ID and passcode in the console's configuration.
+- Starts the console before the meeting; it joins on its own.
+- Doesn't join the meeting on another device with the same Zoom account.
+- Connects their PC and the device to a Wi-Fi network on which they can reach each other: sets the device's Wi-Fi details and the console's device address before the meeting.
 - Places the device on the chair's table, powered and facing the chair, so the chair can see it from their seat.
+- Doesn't run the room's audio or video; the AV technician does.
 
 Referenced by: [UC-HAND-001](hand-signal.md#uc-hand-001)
 

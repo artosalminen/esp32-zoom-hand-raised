@@ -9,13 +9,14 @@ verifies:
 checked-at: ui
 verifiability: verifiable
 given:
-  - The room PC is in a Zoom meeting with the Participants panel open and the watcher running
+  - The technician console is in the Zoom meeting and the device is receiving its state
   - The device shows lowered
-when: The watcher on the PC is stopped
+when: The program on the technician's PC is stopped
 then:
   - The device shows not watching within 10 s
 uses-terms:
   - TERM-DEVICE-STATE
+  - TERM-TECHNICIAN-CONSOLE
 sources:
   - kind: idea
     ref: Capture session with the user, rounds 1 and 2 (Q3, Q10)
@@ -24,4 +25,4 @@ sources:
 
 ## Intent
 
-The chair must never trust a "lowered" that nobody is backing up. This tests only the watcher being stopped. The PC going to sleep and Wi-Fi being lost aren't tested here; the use case's 10-second rule covers them.
+The chair must never trust a "lowered" that nobody is backing up. This tests only the console program being stopped. The PC going to sleep and Wi-Fi being lost aren't tested here; the use case's 10-second rule covers them.

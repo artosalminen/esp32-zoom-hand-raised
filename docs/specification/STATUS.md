@@ -10,11 +10,11 @@ Generated from the element files. The readable specification starts at the [cont
 |---|---|---|---|---|
 | System areas | 1 | 0 | 0 | 0 |
 | Use cases | 1 | 0 | 0 | 0 |
-| Constraints | 1 | 0 | 0 | 0 |
-| Acceptance criteria | 6 | 0 | 0 | 0 |
-| Actors | 2 | 0 | 0 | 0 |
-| Assumptions | 1 | 0 | 0 | 0 |
-| Glossary terms | 1 | 0 | 0 | 0 |
+| Constraints | 1 | 0 | 0 | 1 |
+| Acceptance criteria | 6 | 0 | 0 | 1 |
+| Actors | 3 | 0 | 0 | 0 |
+| Assumptions | 1 | 0 | 0 | 1 |
+| Glossary terms | 2 | 0 | 0 | 0 |
 
 ## Verifiability
 
@@ -32,4 +32,4 @@ None.
 
 | Assumption | Confirm with |
 |---|---|
-| [AS-ZOOM-UIA-001](pages/hand-signal.md#as-zoom-uia-001) Through UI Automation, the Zoom desktop client's Participants panel exposes every participant's row, including rows scrolled out of view, with an accessible name that marks a raised hand and marks the room PC's own row, in English and in Finnish. | developers |
+| [AS-WEBSDK-001](pages/hand-signal.md#as-websdk-001) A console joined to an outside meeting as the technician's signed-in user, without co-host rights, sees every participant's raised hand through the SDK within a second or two of each change. | developers |

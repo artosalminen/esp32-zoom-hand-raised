@@ -18,4 +18,4 @@ Notice promptly when a participant in Zoom raises a hand, without having to keep
 ## Responsibilities
 
 - Chairs the meeting and decides who speaks; the system only signals that a hand is raised.
-- Doesn't operate the Windows PC or the watcher.
+- Doesn't operate the technician console or the room PC.

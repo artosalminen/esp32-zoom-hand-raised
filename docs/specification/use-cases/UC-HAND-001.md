@@ -2,20 +2,22 @@
 id: UC-HAND-001
 type: use-case
 title: Show a raised hand on the chair's device
-summary: While the meeting room's PC is in a Zoom meeting, the device on the chair's table shows whether any remote participant has a raised hand, and shows plainly when the system can't tell.
+summary: While the technician console is in the Zoom meeting, the device on the chair's table shows whether any remote participant has a raised hand, and shows plainly when the system can't tell.
 status: draft
 system-area: BC-HAND-SIGNAL
 primary-actor: ACT-CHAIR
 supporting-actors:
   - ACT-TECHNICIAN
+  - ACT-AV-TECHNICIAN
 governed-by:
-  - CON-ZOOM-UIA
+  - CON-ZOOM-WEBSDK
 uses-terms:
   - TERM-DEVICE-STATE
+  - TERM-TECHNICIAN-CONSOLE
 open-questions: []
 sources:
   - kind: idea
-    ref: Capture session with the user, rounds 1-3 and review
+    ref: Capture session with the user, rounds 1-4 and review
     date: 2026-11-24
 ---
 
@@ -29,27 +31,30 @@ A remote participant raises their hand with Zoom's "Raise hand" feature.
 
 ## Preconditions
 
-- The technician has joined the meeting with the Zoom desktop client on the room's Windows PC, has the Participants panel open, and has the watcher running.
-- The PC and the device are on a Wi-Fi network where they can reach each other, and the device is powered on the chair's table.
+- The technician has signed in to Zoom in the console, the usual meeting ID and passcode are saved, and the console is running.
+- The console has joined the meeting, with no microphone and no camera, and has been admitted from the waiting room. It doesn't need to be co-host.
+- The technician's PC and the device are on a Wi-Fi network where they can reach each other, and the device is powered on the chair's table.
 
 ## Main flow
 
 1. A remote participant raises their hand in Zoom.
-2. Within 3 s of the hand showing as raised in the room PC's Participants panel, the device shows **raised**.
-3. The chair gives the floor; the participant lowers their hand, or the technician or host lowers it in Zoom.
+2. Within 3 s, the device shows **raised**.
+3. The chair gives the floor; the participant lowers their hand, or a host or co-host lowers it in Zoom.
 4. Within 3 s of the last raised hand being lowered, the device shows **lowered**.
 
 ## Alternative flows
 
-- At 1, a hand raised by the room PC's own Zoom user is ignored; the device stays as it was.
+- Before 1, joining: when the console starts, it joins the saved meeting by itself, and the device shows **not watching** until the console is in the meeting. If the meeting hasn't started, the console tries again every 30 s. If it's in the waiting room, it waits there. Once admitted, the device shows the current state within 3 s.
 - At 2, more hands go up while the device shows **raised**: it stays **raised**. At 4, it shows **lowered** only when no remote participant's hand is raised.
 - At 3, a participant leaves the meeting with their hand raised: their hand no longer counts.
 
 ## Failure handling
 
-- After power-on, the device shows **not watching** until it receives a state from the PC.
-- If the Participants panel is closed, the meeting ends, or Zoom stops running, the device shows **not watching** within 3 s. When the panel is open again in a meeting, the device shows the current state within 3 s.
-- If the device hears nothing from the PC for 10 s (watcher stopped, PC off or asleep, Wi-Fi lost, the network blocks the two from reaching each other), the device shows **not watching** on its own.
+- After power-on, the device shows **not watching** until it receives a state from the technician's PC.
+- If Zoom refuses the join (wrong saved meeting ID or passcode, meeting locked, app not authorised), the console shows the technician the reason, and the device shows **not watching**.
+- If the console leaves the meeting, is removed, or the meeting ends, the device shows **not watching** within 3 s.
+- If the device hears nothing from the technician's PC for 10 s (console stopped, PC off or asleep, Wi-Fi lost, the network blocks the two from reaching each other), the device shows **not watching** on its own.
+- If the technician's sign-in can't be renewed, the console asks them to sign in again, and the device shows **not watching** until the console is back in the meeting.
 - If the device loses power, it's dark, which the chair can see is not **lowered**.
 
 ## Out of scope
@@ -57,4 +62,4 @@ A remote participant raises their hand with Zoom's "Raise hand" feature.
 - Zoom reactions other than "Raise hand", and hands raised on camera.
 - How many hands are raised, or whose.
 - Dismissing the signal from the device; it follows Zoom only.
-- Breakout rooms: the room PC stays in the main meeting room.
+- Breakout rooms: the console stays in the main meeting room.

@@ -10,13 +10,15 @@ Generated from the element files in this folder, one file per element. The files
 
 | Area | What it covers | Use cases | Requirements | Open questions |
 |---|---|---|---|---|
-| [BC-HAND-SIGNAL Hand signal](pages/hand-signal.md) | Notices raised hands in a Zoom meeting, as seen by the meeting room's Windows PC, and shows them on a device on the chair's table. | 1 | 2 | 0 |
+| [BC-HAND-SIGNAL Hand signal](pages/hand-signal.md) | Notices raised hands in a Zoom meeting through the technician console, and shows them on a device on the chair's table. | 1 | 2 | 0 |
 
 ```mermaid
 flowchart LR
   n_BC_HAND_SIGNAL["BC-HAND-SIGNAL Hand signal"]
+  n_ACT_AV_TECHNICIAN(["ACT-AV-TECHNICIAN AV technician"])
   n_ACT_CHAIR(["ACT-CHAIR Chair"])
   n_ACT_TECHNICIAN(["ACT-TECHNICIAN Technician"])
+  n_ACT_AV_TECHNICIAN --- n_BC_HAND_SIGNAL
   n_ACT_CHAIR --- n_BC_HAND_SIGNAL
   n_ACT_TECHNICIAN --- n_BC_HAND_SIGNAL
 ```
@@ -30,6 +32,6 @@ Acceptance criteria are written next to what they verify.
 - Use cases
   - [UC-HAND-001](pages/hand-signal.md#uc-hand-001) Show a raised hand on the chair's device
 - Constraints
-  - [CON-ZOOM-UIA](pages/hand-signal.md#con-zoom-uia) Detect raised hands from the Zoom desktop client's accessibility information
+  - [CON-ZOOM-WEBSDK](pages/hand-signal.md#con-zoom-websdk) Detect raised hands with the Zoom Meeting SDK for Web in the technician console
 - Assumptions
-  - [AS-ZOOM-UIA-001](pages/hand-signal.md#as-zoom-uia-001) The Participants panel exposes every raised hand and the own row through UI Automation
+  - [AS-WEBSDK-001](pages/hand-signal.md#as-websdk-001) The Web SDK shows every raised hand to an ordinary participant joined with ZAK

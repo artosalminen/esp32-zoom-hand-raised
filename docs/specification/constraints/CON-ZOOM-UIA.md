@@ -3,7 +3,7 @@ id: CON-ZOOM-UIA
 type: constraint
 title: Detect raised hands from the Zoom desktop client's accessibility information
 summary: Raised hands are detected only by reading the accessibility information (Windows UI Automation) that the Zoom desktop client exposes on the user's own PC.
-status: draft
+status: retired
 constraint-kind: technical
 imposed-by: Design decision made by the project owner
 applies-to: []
