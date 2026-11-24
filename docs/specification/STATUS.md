@@ -11,7 +11,7 @@ Generated from the element files. The readable specification starts at the [cont
 | System areas | 0 | 1 | 0 | 0 |
 | Use cases | 0 | 1 | 0 | 0 |
 | Constraints | 0 | 1 | 0 | 1 |
-| Acceptance criteria | 0 | 8 | 0 | 1 |
+| Acceptance criteria | 0 | 9 | 0 | 1 |
 | Actors | 0 | 3 | 0 | 0 |
 | Assumptions | 0 | 0 | 0 | 2 |
 | Glossary terms | 0 | 2 | 0 | 0 |

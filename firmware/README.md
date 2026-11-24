@@ -16,10 +16,11 @@ Written for an ESP32-C3 board with a 0.42" 72×40 SSD1306 OLED (e.g. the diymore
 OLED" board). The OLED is on I2C **SDA = GPIO5, SCL = GPIO6**. If your board uses other pins, add
 `-DOLED_SDA=<n>` and `-DOLED_SCL=<n>` to `build_flags` in `platformio.ini`.
 
-The board's OLED is monochrome, so it can't show the three state *colours* the spec asks for
-([TERM-DEVICE-STATE](../docs/specification/glossary/TERM-DEVICE-STATE.md)). It tells the states
-apart by the number, the inverted background and the top line instead. For colours, wire one
-WS2812 RGB LED (5V/3V3, GND, data) and uncomment `-DRGB_LED_PIN=4` (or your data pin) in
+The board's OLED is monochrome. As the spec allows for a device without an RGB LED
+([TERM-DEVICE-STATE](../docs/specification/glossary/TERM-DEVICE-STATE.md)), it tells the states
+apart with symbols: **raised** lights the whole screen, so it's the easiest to notice; lowered
+and not watching are a light `0` or `-` on a dark screen. To add state colours as well, wire one
+WS2812 RGB LED (3V3, GND, data) and uncomment `-DRGB_LED_PIN=4` (or your data pin) in
 `platformio.ini`.
 
 ## Set up

@@ -22,6 +22,9 @@ sources:
   - kind: idea
     ref: Capture session, hand count on a display
     date: 2026-11-24
+  - kind: idea
+    ref: Capture session, symbols on a monochrome display, and review (R1-R5, R8)
+    date: 2026-11-24
 ---
 
 ## Goal
@@ -51,7 +54,8 @@ A remote participant raises their hand with Zoom's "Raise hand" feature.
 - Before 1, joining: when the console starts, it joins the saved meeting by itself, and the device shows **not watching** until the console is in the meeting. If the meeting hasn't started, the console tries again every 30 s. If it's in the waiting room, it waits there. Once admitted, the device shows the current state within 3 s.
 - At 2, more hands go up while the device shows **raised**: it stays **raised**. At 4, it shows **lowered** only when no remote participant's hand is raised.
 - At 3, a participant leaves the meeting with their hand raised: their hand no longer counts.
-- Where the device has a display, it also shows a number, updated within 3 s of any change in the number of raised remote hands or in the state: **0** when **lowered**; the number of remote participants with a raised hand, **1** to **9**, or **9+** above nine, when **raised**; a dash (**–**) when **not watching**, never a number.
+- Where the device has a display, the chair must notice **raised** before anything else; how many hands are raised is secondary and must never make **raised** harder to notice. The display shows a number, updated within 3 s of any change in the number of raised remote hands or in the state: **0** when **lowered**; the number of remote participants with a raised hand, **1** to **9**, or **9+** above nine, when **raised**; a dash (**–**) when **not watching**, never a number.
+- Where the display is monochrome, whether or not an RGB LED is also fitted: **raised** lights the whole display, with the number dark on the lit background. **Lowered** shows a light "0" on an otherwise unlit display. **Not watching** shows a light "–" and a line of text: the device's address when it's on Wi-Fi, otherwise "no wifi". **Lowered** and **raised** may also show a short label.
 
 ## Failure handling
 

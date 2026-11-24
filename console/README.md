@@ -51,7 +51,7 @@ the participant list.
 |---|---|
 | Console running, meeting not started | `-` |
 | Admitted, no hands | `0` (AC-HAND-007) |
-| Someone raises a hand | `1`, inverted, within 3 s (AC-HAND-001) |
+| Someone raises a hand | `1`, whole screen lit, within 3 s (AC-HAND-001, AC-HAND-010) |
 | Two hands, one lowered | `2` then `1`, stays raised (AC-HAND-005, AC-HAND-008) |
 | Last hand lowered | `0` within 3 s (AC-HAND-002) |
 | Host ends the meeting or removes the console | `-` within 3 s (AC-HAND-004, AC-HAND-009) |
