@@ -4,7 +4,9 @@
 // Node 18+, no dependencies.  Run: node server.mjs
 import http from 'node:http';
 import crypto from 'node:crypto';
+import dns from 'node:dns/promises';
 import fs from 'node:fs';
+import net from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -44,6 +46,20 @@ function effectiveState() {
   return { state: fromPage.state, count: fromPage.state === 'raised' ? fromPage.count : 0 };
 }
 
+// Resolve a hostname like hand-signal.local over IPv4 only: the device has no IPv6 address,
+// and an "any family" lookup waits about 5 s for an IPv6 answer that never comes.
+let resolved = { ip: null, at: 0 };
+async function deviceBase() {
+  const u = new URL(DEVICE_URL);
+  if (net.isIP(u.hostname)) return DEVICE_URL;
+  if (!resolved.ip || Date.now() - resolved.at > 60000) {
+    const { address } = await dns.lookup(u.hostname, { family: 4 });
+    resolved = { ip: address, at: Date.now() };
+  }
+  u.hostname = resolved.ip;
+  return u.toString().replace(/\/+$/, '');
+}
+
 let sending = false;
 async function sendToDevice() {
   if (sending) return;
@@ -51,13 +67,14 @@ async function sendToDevice() {
   const s = effectiveState();
   try {
     const body = new URLSearchParams({ state: s.state, count: String(s.count), token: config.deviceToken || '' });
-    const res = await fetch(`${DEVICE_URL}/state`, { method: 'POST', body, signal: AbortSignal.timeout(2500) });
+    const res = await fetch(`${await deviceBase()}/state`, { method: 'POST', body, signal: AbortSignal.timeout(2500) });
     if (!res.ok) throw new Error(`device answered ${res.status} ${await res.text().catch(() => '')}`.trim());
     if (!device.ok || JSON.stringify(device.sent) !== JSON.stringify(s)) {
       console.log(`${new Date().toISOString()} device ← ${s.state}${s.state === 'raised' ? ` (${s.count})` : ''}`);
     }
     Object.assign(device, { ok: true, lastError: '', lastSentAt: Date.now(), sent: s });
   } catch (err) {
+    resolved.at = 0; // look the address up again next time (e.g. the device got a new IP)
     const msg = String(err.cause?.code || err.message || err);
     if (device.ok || device.lastError !== msg) console.log(`${new Date().toISOString()} device unreachable: ${msg}`);
     Object.assign(device, { ok: false, lastError: msg });
